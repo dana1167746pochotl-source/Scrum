@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScrumFlow — Agile Project Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg-primary: #0d0b1e;
+  --bg-secondary: #130f2a;
+  --bg-card: #1a1535;
+  --bg-hover: #231c45;
+  --border: rgba(180,80,255,0.18);
+  --border-bright: rgba(200,100,255,0.5);
+  --accent: #b44fff;
+  --accent-glow: rgba(180,80,255,0.25);
+  --accent2: #00d4aa;
+  --accent3: #ff4fa3;
+  --accent4: #ffd166;
+  --text-primary: #ede8ff;
+  --text-secondary: #9b8ec4;
+  --text-muted: #5a4f7a;
+  --success: #00d4aa;
+  --warning: #ffd166;
+  --danger: #ff4fa3;
+  --info: #7eb8ff;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --shadow: 0 8px 40px rgba(100,0,180,0.35);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  --gradient-hero: linear-gradient(135deg, #1a0533 0%, #0d1b4a 50%, #1a0533 100%);
+  --gradient-accent: linear-gradient(90deg, #b44fff, #ff4fa3);
+  --gradient-btn: linear-gradient(135deg, #7c3aed, #b44fff);
+}
+[data-theme="light"] {
+  --bg-primary: #f5f0e8;
+  --bg-secondary: #ede5d4;
+  --bg-card: #fffdf7;
+  --bg-hover: #f0e8d4;
+  --border: rgba(160,120,40,0.2);
+  --border-bright: rgba(180,130,40,0.45);
+  --text-primary: #1c1408;
+  --text-secondary: #5c4a20;
+  --text-muted: #a08c60;
+  --shadow: 0 4px 20px rgba(160,120,40,0.15);
+  --accent: #b06c00;
+  --accent-glow: rgba(180,120,0,0.18);
+  --accent2: #007a5e;
+  --accent3: #c0392b;
+  --accent4: #d4860a;
+  --gradient-accent: linear-gradient(90deg, #b06c00, #d4860a);
+  --gradient-btn: linear-gradient(135deg, #8a5200, #c07800);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font-body); background:var(--bg-primary); color:var(--text-primary); min-height:100vh; transition:var(--transition); position:relative; }
+body::before { content:''; position:fixed; inset:0; background: radial-gradient(ellipse 70% 50% at 15% 0%, rgba(120,20,220,0.14) 0%, transparent 65%), radial-gradient(ellipse 50% 40% at 50% 50%, rgba(20,8,60,0.5) 0%, transparent 100%); pointer-events:none; z-index:0; }
+body > * { position:relative; z-index:1; }
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background:var(--accent); border-radius:3px; }
+
+/* NAV */
+.navbar { background:linear-gradient(135deg, #1a0a3a 0%, #0d1b4a 100%); border-bottom:1px solid var(--border-bright); padding:0 1.5rem; height:60px; position:sticky; top:0; z-index:1000; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 30px rgba(140,30,255,0.3); }
+.brand { font-family:var(--font-mono); font-size:1.1rem; background:var(--gradient-accent); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:700; letter-spacing:-0.5px; display:flex; align-items:center; gap:8px; }
+.brand span { color:var(--text-primary); }
+.brand-dot { width:8px; height:8px; background:var(--accent2); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+.nav-tabs-custom { display:flex; gap:4px; }
+.nav-tab { padding:6px 14px; border-radius:6px; font-size:0.82rem; font-weight:500; color:var(--text-secondary); cursor:pointer; transition:var(--transition); border:none; background:transparent; }
+.nav-tab:hover { color:var(--text-primary); background:var(--bg-hover); }
+.nav-tab.active { color:#e0b8ff; background:rgba(140,50,255,0.22); font-weight:600; }
+.nav-actions { display:flex; align-items:center; gap:10px; }
+.btn-icon { width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.btn-icon:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+.sprint-badge { font-family:var(--font-mono); font-size:0.72rem; background:rgba(140,50,255,0.35); border:1px solid rgba(200,130,255,0.6); color:#ffffff; padding:4px 12px; border-radius:20px; font-weight:700; text-shadow:0 0 10px rgba(200,150,255,0.8); }
+
+/* MAIN SECTIONS */
+.page-section { display:none; padding:1.2rem; min-height:calc(100vh - 60px); }
+.page-section.active { display:block; }
+
+/* KANBAN */
+.kanban-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.kanban-title { font-family:var(--font-mono); font-size:1rem; color:var(--text-secondary); }
+.kanban-title span { color:var(--text-primary); }
+.kanban-board { display:flex; gap:10px; overflow-x:auto; padding-bottom:1.5rem; padding-right:0.5rem; min-height:calc(100vh - 200px); }
+.kanban-col { min-width:240px; width:240px; flex-shrink:0; background:rgba(19,15,42,0.85); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:var(--radius); display:flex; flex-direction:column; max-height:calc(100vh - 200px); overflow:hidden; }
+.col-header { padding:12px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:rgba(19,15,42,0.95); backdrop-filter:blur(12px); border-radius:var(--radius) var(--radius) 0 0; z-index:1; }
+.col-name { font-size:0.78rem; font-weight:700; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.5px; text-shadow:0 0 12px currentColor; }
+.col-count { font-size:0.72rem; background:var(--bg-card); color:var(--text-muted); padding:2px 7px; border-radius:10px; }
+.col-body { padding:8px; overflow-y:auto; overflow-x:hidden; flex:1; display:flex; flex-direction:column; gap:8px; }
+.col-body.drag-over { background:rgba(99,120,255,0.07); border-radius:0 0 var(--radius) var(--radius); }
+
+/* STATUS COLORS */
+.col-backlog .col-name { color:var(--text-muted); }
+.col-todo .col-name { color:var(--accent4); }
+.col-code .col-name { color:var(--accent); }
+.col-design .col-name { color:#c778dd; }
+.col-review .col-name { color:var(--info); }
+.col-testing .col-name { color:var(--accent2); }
+.col-done .col-name { color:var(--success); }
+
+/* TASK CARDS */
+.task-card { background:rgba(26,21,53,0.92); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:var(--radius-sm); padding:11px; cursor:grab; transition:var(--transition); position:relative; overflow:hidden; width:100%; box-sizing:border-box; word-break:break-word; }
+.task-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; border-radius:3px 0 0 3px; }
+.task-card.priority-critical::before { background:var(--danger); }
+.task-card.priority-high::before { background:var(--warning); }
+.task-card.priority-medium::before { background:var(--accent); }
+.task-card.priority-low::before { background:var(--success); }
+.task-card:hover { border-color:var(--border-bright); transform:translateY(-2px); box-shadow:var(--shadow); }
+.task-card.dragging { opacity:0.4; transform:rotate(2deg); }
+.task-epic { font-size:0.68rem; font-weight:700; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.5px; color:#d4aaff; margin-bottom:4px; }
+.task-title { font-size:0.85rem; font-weight:700; color:#f0e8ff; margin-bottom:8px; line-height:1.3; }
+.task-story { font-size:0.73rem; color:var(--text-secondary); margin-bottom:8px; line-height:1.4; }
+.task-meta { display:flex; align-items:center; justify-content:flex-start; flex-wrap:wrap; gap:4px; }
+.task-points { font-family:var(--font-mono); font-size:0.72rem; font-weight:700; background:rgba(140,50,255,0.35); color:#e8d5ff; padding:3px 8px; border-radius:5px; border:1px solid rgba(200,130,255,0.5); letter-spacing:0.3px; }
+.task-priority { font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; }
+.priority-critical { background:rgba(255,107,107,0.15); color:var(--danger); border:1px solid rgba(255,107,107,0.3); }
+.priority-high { background:rgba(255,209,102,0.15); color:var(--warning); border:1px solid rgba(255,209,102,0.3); }
+.priority-medium { background:rgba(99,120,255,0.15); color:var(--accent); border:1px solid rgba(99,120,255,0.3); }
+.priority-low { background:rgba(0,212,170,0.15); color:var(--success); border:1px solid rgba(0,212,170,0.3); }
+.task-date { font-size:0.68rem; color:var(--text-muted); display:flex; align-items:center; gap:3px; }
+.task-assignee { width:22px; height:22px; border-radius:50%; background:var(--accent); font-size:0.65rem; font-weight:700; display:flex; align-items:center; justify-content:center; color:#fff; border:2px solid var(--bg-card); flex-shrink:0; }
+.task-actions { display:flex; gap:4px; margin-top:8px; }
+.task-btn { padding:3px 8px; border-radius:4px; font-size:0.68rem; border:1px solid var(--border); background:transparent; color:var(--text-muted); cursor:pointer; transition:var(--transition); }
+.task-btn:hover { border-color:var(--accent); color:var(--accent); }
+.task-btn.del:hover { border-color:var(--danger); color:var(--danger); }
+.add-task-btn { padding:8px; border-radius:6px; border:1px dashed var(--border); background:transparent; color:var(--text-muted); cursor:pointer; font-size:0.78rem; text-align:center; transition:var(--transition); margin-top:4px; }
+.add-task-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-glow); }
+
+/* PANEL/MODAL */
+.side-panel { position:fixed; right:-420px; top:0; bottom:0; width:420px; background:linear-gradient(180deg, #1a0a3a 0%, #0d1b4a 100%); border-left:1px solid var(--border-bright); z-index:2000; padding:1.5rem; overflow-y:auto; transition:right 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:-16px 0 48px rgba(80,0,160,0.5); }
+.side-panel.open { right:0; }
+.panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+.panel-title { font-family:var(--font-mono); font-size:0.9rem; color:var(--accent); }
+.panel-close { width:32px; height:32px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.panel-close:hover { border-color:var(--danger); color:var(--danger); }
+.form-group { margin-bottom:1rem; }
+.form-label { font-size:0.75rem; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; display:block; }
+.form-control, .form-select { background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); border-radius:8px; padding:8px 12px; font-size:0.85rem; width:100%; transition:var(--transition); font-family:var(--font-body); }
+.form-control:focus, .form-select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); background:var(--bg-card); color:var(--text-primary); }
+.form-select option { background:var(--bg-card); color:var(--text-primary); }
+textarea.form-control { resize:vertical; min-height:80px; }
+.btn-primary-custom { background:var(--gradient-btn); color:#fff; border:none; border-radius:8px; padding:10px 20px; font-size:0.85rem; font-weight:600; cursor:pointer; transition:var(--transition); width:100%; box-shadow:0 2px 16px rgba(140,30,255,0.3); }
+.btn-primary-custom:hover { background:linear-gradient(135deg,#9333ea,#d946ef); transform:translateY(-1px); box-shadow:0 6px 24px rgba(180,80,255,0.45); }
+
+/* TEAM */
+.team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
+.member-card { background:rgba(26,21,53,0.9); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:var(--radius); padding:20px; text-align:center; transition:var(--transition); position:relative; }
+.member-card:hover { border-color:var(--border-bright); transform:translateY(-3px); box-shadow:var(--shadow); }
+.member-avatar { width:60px; height:60px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); font-size:1.4rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:#fff; border:3px solid var(--bg-secondary); box-shadow:0 0 20px var(--accent-glow); }
+.member-name { font-weight:700; font-size:0.95rem; margin-bottom:4px; }
+.member-role { font-size:0.75rem; font-family:var(--font-mono); padding:3px 10px; border-radius:20px; display:inline-block; margin-bottom:12px; }
+.role-sm { background:rgba(255,107,107,0.15); color:var(--danger); border:1px solid rgba(255,107,107,0.3); }
+.role-po { background:rgba(255,209,102,0.15); color:var(--warning); border:1px solid rgba(255,209,102,0.3); }
+.role-dev { background:rgba(99,120,255,0.15); color:var(--accent); border:1px solid rgba(99,120,255,0.3); }
+.role-qa { background:rgba(0,212,170,0.15); color:var(--success); border:1px solid rgba(0,212,170,0.3); }
+.member-email { font-size:0.75rem; color:var(--text-muted); }
+.member-del { position:absolute; top:10px; right:10px; width:26px; height:26px; border-radius:5px; border:1px solid var(--border); background:transparent; color:var(--text-muted); cursor:pointer; font-size:0.7rem; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+.member-del:hover { border-color:var(--danger); color:var(--danger); background:rgba(255,107,107,0.1); }
+
+/* METRICS */
+.metrics-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:1.5rem; }
+.metric-card { background:rgba(26,21,53,0.9); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:var(--radius); padding:16px; text-align:center; transition:var(--transition); }
+.metric-card:hover { border-color:var(--border-bright); }
+.metric-value { font-family:var(--font-mono); font-size:1.8rem; font-weight:700; margin-bottom:4px; }
+.metric-label { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; }
+.charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.chart-card { background:rgba(26,21,53,0.9); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.chart-title { font-family:var(--font-mono); font-size:0.8rem; color:#b89eff; margin-bottom:16px; letter-spacing:0.5px; }
+canvas { max-width:100%; }
+@media(max-width:768px){ .charts-grid { grid-template-columns:1fr; } }
+
+/* CEREMONIES */
+.ceremony-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+.ceremony-card { background:rgba(26,21,53,0.9); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:var(--radius); padding:20px; transition:var(--transition); }
+.ceremony-card:hover { border-color:var(--border-bright); transform:translateY(-2px); }
+.ceremony-icon { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; margin-bottom:12px; }
+.ceremony-type { font-size:0.7rem; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px; }
+.ceremony-title { font-size:0.95rem; font-weight:700; margin-bottom:8px; }
+.ceremony-date { font-size:0.78rem; color:var(--text-secondary); display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+.ceremony-notes { font-size:0.78rem; color:var(--text-muted); line-height:1.5; padding:10px; background:var(--bg-secondary); border-radius:6px; border:1px solid var(--border); }
+.ceremony-del { float:right; background:transparent; border:1px solid var(--border); color:var(--text-muted); padding:2px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer; transition:var(--transition); }
+.ceremony-del:hover { border-color:var(--danger); color:var(--danger); }
+.ceremony-status { font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-left:8px; }
+.status-scheduled { background:rgba(99,120,255,0.15); color:var(--accent); }
+.status-completed { background:rgba(0,212,170,0.15); color:var(--success); }
+.status-cancelled { background:rgba(255,107,107,0.15); color:var(--danger); }
+
+/* TOAST */
+.toast-container { position:fixed; bottom:20px; right:20px; z-index:9999; display:flex; flex-direction:column; gap:8px; }
+.toast { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px 16px; display:flex; align-items:center; gap:10px; font-size:0.82rem; box-shadow:var(--shadow); animation:slideIn 0.3s ease; min-width:240px; }
+.toast.success { border-left:3px solid var(--success); }
+.toast.error { border-left:3px solid var(--danger); }
+.toast.info { border-left:3px solid var(--accent); }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+
+/* OVERLAY */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1999; backdrop-filter:blur(4px); }
+.overlay.active { display:block; }
+
+/* SECTION HEADER */
+.section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:12px; }
+.section-title { font-family:var(--font-mono); font-size:1rem; color:var(--text-primary); }
+.section-title span { color:var(--accent); }
+
+/* PROGRESS */
+.sprint-progress { background:linear-gradient(135deg, rgba(26,5,51,0.9), rgba(13,27,74,0.9)); backdrop-filter:blur(12px); border:1px solid var(--border-bright); border-radius:var(--radius); padding:16px 20px; margin-bottom:1.5rem; display:flex; align-items:center; gap:20px; flex-wrap:wrap; box-shadow:0 4px 30px rgba(140,30,255,0.2); }
+.progress-info { flex:1; min-width:200px; }
+.progress-label { font-size:0.72rem; color:#b89eff; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; font-weight:600; }
+.progress-bar-outer { background:var(--bg-secondary); border-radius:20px; height:8px; overflow:hidden; }
+.progress-bar-inner { height:100%; border-radius:20px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.progress-pct { font-family:var(--font-mono); font-size:0.85rem; color:#e0c8ff; margin-top:4px; font-weight:700; }
+
+/* VELOCITY */
+.velocity-tags { display:flex; gap:8px; flex-wrap:wrap; }
+.velocity-tag { font-family:var(--font-mono); font-size:0.72rem; background:rgba(140,50,255,0.2); border:1px solid rgba(200,130,255,0.35); border-radius:20px; padding:4px 12px; color:#d4baff; white-space:nowrap; }
+.velocity-tag strong { color:#ffffff; font-size:0.82rem; }
+
+/* RESPONSIVE NAV */
+@media(max-width:768px) {
+  .nav-tabs-custom { overflow-x:auto; gap:2px; }
+  .nav-tab { padding:5px 10px; font-size:0.75rem; }
+  .nav-tab span { display:none; }
+  .nav-actions { gap:6px; }
+  .page-section { padding:0.8rem; }
+  .kanban-board { gap:8px; padding-bottom:2rem; }
+  .kanban-col { min-width:85vw; width:85vw; max-height:75vh; }
+  .section-header { flex-direction:column; align-items:flex-start; }
+  .filter-bar { gap:5px; }
+  .charts-grid { grid-template-columns:1fr; }
+  .team-grid { grid-template-columns:1fr 1fr; }
+  .board-name-wrap { flex-wrap:wrap; gap:6px; }
+}
+@media(max-width:420px) {
+  .kanban-col { min-width:92vw; width:92vw; }
+  .team-grid { grid-template-columns:1fr; }
+  .navbar { padding:0 0.8rem; }
+}
+
+/* EMPTY STATE */
+.empty-state { text-align:center; padding:40px 20px; color:var(--text-muted); }
+.empty-state i { font-size:2rem; margin-bottom:12px; display:block; opacity:0.3; }
+.empty-state p { font-size:0.85rem; }
+
+/* FILTER BAR */
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
+.filter-chip { font-size:0.75rem; padding:4px 12px; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--text-secondary); cursor:pointer; transition:var(--transition); }
+.filter-chip:hover, .filter-chip.active { border-color:#c87aff; color:#ffffff; background:rgba(140,50,255,0.35); font-weight:600; }
+.search-input { background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); border-radius:20px; padding:6px 14px 6px 34px; font-size:0.8rem; transition:var(--transition); position:relative; }
+.search-input:focus { outline:none; border-color:var(--accent); }
+.search-wrap { position:relative; }
+.search-wrap i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:0.75rem; }
+
+/* SPRINT MODAL */
+.modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:3000; backdrop-filter:blur(6px); align-items:center; justify-content:center; }
+.modal-backdrop.open { display:flex; }
+.sprint-modal { background:linear-gradient(160deg, #1a0a3a 0%, #0d1b4a 100%); border:1px solid var(--border-bright); border-radius:16px; width:min(680px,95vw); max-height:88vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 80px rgba(120,0,220,0.5); animation:modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes modalIn { from{transform:scale(0.88) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+.modal-header { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.modal-title { font-family:var(--font-mono); font-size:0.9rem; color:var(--accent); }
+.modal-body { padding:20px 22px; overflow-y:auto; flex:1; }
+.modal-footer { padding:14px 22px; border-top:1px solid var(--border); display:flex; gap:10px; flex-shrink:0; }
+.btn-ghost { background:transparent; border:1px solid var(--border); color:var(--text-secondary); border-radius:8px; padding:8px 16px; font-size:0.82rem; cursor:pointer; transition:var(--transition); }
+.btn-ghost:hover { border-color:var(--border-bright); color:var(--text-primary); }
+.btn-danger-ghost { background:transparent; border:1px solid rgba(255,107,107,0.4); color:var(--danger); border-radius:8px; padding:6px 12px; font-size:0.78rem; cursor:pointer; transition:var(--transition); }
+.btn-danger-ghost:hover { background:rgba(255,107,107,0.1); }
+
+/* SPRINT LIST */
+.sprint-list { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.sprint-item { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:14px; transition:var(--transition); cursor:pointer; }
+.sprint-item:hover { border-color:var(--border-bright); }
+.sprint-item.active-sprint { border-color:var(--accent); background:rgba(99,120,255,0.08); }
+.sprint-item-indicator { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.sprint-item.active-sprint .sprint-item-indicator { background:var(--accent); box-shadow:0 0 8px var(--accent); }
+.sprint-item.closed-sprint .sprint-item-indicator { background:var(--success); }
+.sprint-item.planned-sprint .sprint-item-indicator { background:var(--text-muted); }
+.sprint-item-info { flex:1; }
+.sprint-item-name { font-weight:700; font-size:0.9rem; margin-bottom:3px; display:flex; align-items:center; gap:8px; }
+.sprint-item-meta { font-size:0.73rem; color:var(--text-muted); display:flex; gap:14px; flex-wrap:wrap; }
+.sprint-item-actions { display:flex; gap:6px; }
+.sprint-status-badge { font-size:0.65rem; font-family:var(--font-mono); padding:2px 8px; border-radius:10px; font-weight:700; text-transform:uppercase; }
+.badge-active { background:rgba(99,120,255,0.15); color:var(--accent); border:1px solid rgba(99,120,255,0.3); }
+.badge-closed { background:rgba(0,212,170,0.15); color:var(--success); border:1px solid rgba(0,212,170,0.3); }
+.badge-planned { background:rgba(74,83,112,0.3); color:var(--text-muted); border:1px solid var(--border); }
+.sprint-progress-mini { height:4px; background:var(--bg-secondary); border-radius:2px; margin-top:6px; overflow:hidden; }
+.sprint-progress-mini-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width 0.4s ease; }
+
+/* SPRINT FORM */
+.sprint-form-divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+.sprint-form-title { font-family:var(--font-mono); font-size:0.78rem; color:var(--text-secondary); margin-bottom:14px; }
+
+/* MOVE TASKS MODAL */
+.move-tasks-list { display:flex; flex-direction:column; gap:8px; max-height:360px; overflow-y:auto; }
+.move-task-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; }
+.move-task-item label { flex:1; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:8px; }
+.move-task-item input[type=checkbox] { accent-color:var(--accent); width:15px; height:15px; cursor:pointer; flex-shrink:0; }
+.move-task-sp { font-family:var(--font-mono); font-size:0.68rem; color:var(--accent); background:var(--accent-glow); padding:1px 6px; border-radius:3px; }
+.sprint-badge-clickable { cursor:pointer; transition:var(--transition); }
+.sprint-badge-clickable:hover { background:rgba(160,70,255,0.45); border-color:#d4a0ff; transform:scale(1.04); box-shadow:0 0 14px rgba(180,80,255,0.5); color:#ffffff; }
+
+/* BOARD RENAME */
+.board-name-wrap { display:flex; align-items:center; gap:8px; }
+.board-name-input { background:transparent; border:none; border-bottom:2px solid var(--border-bright); color:var(--text-primary); font-family:var(--font-mono); font-size:0.9rem; padding:2px 6px; width:180px; outline:none; transition:var(--transition); }
+.board-name-input:focus { border-bottom-color:var(--accent); background:rgba(180,80,255,0.07); border-radius:4px 4px 0 0; }
+.rename-btn { font-size:0.7rem; color:var(--text-muted); background:transparent; border:1px solid var(--border); border-radius:4px; padding:2px 7px; cursor:pointer; transition:var(--transition); }
+.rename-btn:hover { color:var(--accent); border-color:var(--accent); }
+
+/* CREATE FROM SCRATCH MODAL */
+.scratch-modal-body { display:flex; flex-direction:column; gap:16px; }
+.scratch-template { background:rgba(26,21,53,0.9); border:1px solid var(--border); border-radius:10px; padding:14px 16px; cursor:pointer; transition:var(--transition); display:flex; align-items:center; gap:14px; }
+.scratch-template:hover { border-color:var(--border-bright); background:rgba(180,80,255,0.1); transform:translateX(4px); }
+.scratch-template.selected { border-color:var(--accent); background:rgba(180,80,255,0.15); }
+.scratch-template-icon { font-size:1.6rem; flex-shrink:0; }
+.scratch-template-info h4 { font-size:0.88rem; font-weight:700; margin-bottom:3px; }
+.scratch-template-info p { font-size:0.73rem; color:var(--text-muted); }
+.col-editor { display:flex; flex-direction:column; gap:8px; }
+.col-editor-item { display:flex; align-items:center; gap:8px; background:rgba(26,21,53,0.7); border:1px solid var(--border); border-radius:7px; padding:8px 12px; }
+.col-editor-item input { flex:1; background:transparent; border:none; color:var(--text-primary); font-size:0.82rem; outline:none; }
+.col-editor-item .col-color-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.add-col-btn { padding:7px; border:1px dashed var(--border); border-radius:7px; background:transparent; color:var(--text-muted); cursor:pointer; font-size:0.78rem; text-align:center; transition:var(--transition); }
+.add-col-btn:hover { border-color:var(--accent); color:var(--accent); }
+.form-section-label { font-family:var(--font-mono); font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+
+
+/* LIGHT MODE OVERRIDES */
+[data-theme="light"] body::before { background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(240,200,100,0.12) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 80% 100%, rgba(255,220,150,0.08) 0%, transparent 60%); }
+[data-theme="light"] .navbar { background:linear-gradient(135deg, #3d2800 0%, #5c3d00 100%); }
+[data-theme="light"] .kanban-col { background:rgba(255,252,240,0.9); border-color:rgba(160,120,40,0.25); }
+[data-theme="light"] .col-header { background:rgba(245,238,220,0.97); }
+[data-theme="light"] .task-card { background:rgba(255,253,245,0.97); border-color:rgba(180,140,60,0.25); }
+[data-theme="light"] .sprint-progress { background:linear-gradient(135deg, rgba(255,245,220,0.95), rgba(255,235,190,0.95)); border-color:rgba(200,160,60,0.4); }
+[data-theme="light"] .sprint-modal, [data-theme="light"] .side-panel { background:linear-gradient(160deg, #fffbf0 0%, #f5e8c8 100%); }
+[data-theme="light"] .col-backlog .col-name { color:#a08c60; }
+[data-theme="light"] .col-todo .col-name { color:#b06c00; }
+[data-theme="light"] .col-code .col-name { color:#7c3aed; }
+[data-theme="light"] .col-design .col-name { color:#a0388c; }
+[data-theme="light"] .col-review .col-name { color:#0066aa; }
+[data-theme="light"] .col-testing .col-name { color:#007a5e; }
+[data-theme="light"] .col-done .col-name { color:#007a5e; }
+[data-theme="light"] .velocity-tag { background:rgba(180,120,0,0.12); border-color:rgba(180,120,0,0.3); color:#5c3a00; }
+[data-theme="light"] .velocity-tag strong { color:#3d2000; }
+[data-theme="light"] .sprint-badge { background:rgba(160,100,0,0.2); border-color:rgba(200,140,0,0.5); color:#3d2000; text-shadow:none; }
+[data-theme="light"] .task-title { color:#1c1408; }
+[data-theme="light"] .task-epic { color:#8a5200; }
+[data-theme="light"] .filter-chip:hover, [data-theme="light"] .filter-chip.active { background:rgba(160,100,0,0.15); border-color:#b06c00; color:#3d2000; }
+[data-theme="light"] .nav-tab.active { background:rgba(160,100,0,0.2); color:#ffe8a0; }
+[data-theme="light"] .form-control, [data-theme="light"] .form-select { background:#fffdf5; border-color:rgba(160,120,40,0.3); color:#1c1408; }
+[data-theme="light"] .member-card, [data-theme="light"] .metric-card, [data-theme="light"] .chart-card, [data-theme="light"] .ceremony-card { background:rgba(255,252,238,0.95); border-color:rgba(180,140,60,0.25); }
+
+
+/* NOTIFICATION SYSTEM */
+.notif-bell-wrap { position:relative; }
+.notif-dot { position:absolute; top:4px; right:4px; width:8px; height:8px; background:#ff4fa3; border-radius:50%; border:2px solid #1a0a3a; animation:pulse 1.5s infinite; display:none; }
+.notif-dot.show { display:block; }
+.notif-panel { position:fixed; top:64px; right:12px; width:320px; background:linear-gradient(160deg,#1e0d40,#0d1b4a); border:1px solid var(--border-bright); border-radius:14px; z-index:4000; box-shadow:0 16px 60px rgba(100,0,200,0.5); display:none; flex-direction:column; max-height:420px; overflow:hidden; animation:modalIn 0.2s ease; }
+.notif-panel.open { display:flex; }
+.notif-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.notif-title { font-family:var(--font-mono); font-size:0.8rem; color:#e0b8ff; }
+.notif-clear { font-size:0.68rem; color:var(--text-muted); background:transparent; border:1px solid var(--border); border-radius:4px; padding:2px 8px; cursor:pointer; transition:var(--transition); }
+.notif-clear:hover { color:var(--danger); border-color:var(--danger); }
+.notif-list { overflow-y:auto; flex:1; }
+.notif-item { padding:10px 14px; border-bottom:1px solid rgba(180,80,255,0.1); display:flex; gap:10px; align-items:flex-start; transition:var(--transition); cursor:default; }
+.notif-item:hover { background:rgba(180,80,255,0.07); }
+.notif-item.unread { background:rgba(180,80,255,0.1); }
+.notif-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; flex-shrink:0; }
+.notif-icon.new-task { background:rgba(99,120,255,0.2); }
+.notif-icon.overdue { background:rgba(255,79,163,0.2); }
+.notif-icon.sprint { background:rgba(0,212,170,0.2); }
+.notif-icon.phase { background:rgba(255,209,102,0.2); }
+.notif-body { flex:1; }
+.notif-body strong { display:block; font-size:0.78rem; color:#ede8ff; margin-bottom:2px; }
+.notif-body span { font-size:0.7rem; color:var(--text-muted); }
+.notif-time { font-size:0.65rem; color:var(--text-muted); font-family:var(--font-mono); white-space:nowrap; }
+.notif-empty { padding:30px; text-align:center; color:var(--text-muted); font-size:0.8rem; }
+
+/* SPRINT PHASE BANNER */
+.sprint-phase-banner { display:flex; align-items:center; gap:10px; padding:8px 14px; border-radius:8px; margin-bottom:10px; font-size:0.78rem; font-weight:600; animation:slideIn 0.3s ease; }
+.sprint-phase-banner.phase-code { background:rgba(99,120,255,0.15); border:1px solid rgba(99,120,255,0.3); color:#b8c8ff; }
+.sprint-phase-banner.phase-review { background:rgba(100,181,246,0.15); border:1px solid rgba(100,181,246,0.3); color:#a8d4ff; }
+.sprint-phase-banner.phase-testing { background:rgba(0,212,170,0.15); border:1px solid rgba(0,212,170,0.3); color:#80f0d8; }
+.sprint-phase-banner.phase-warning { background:rgba(255,79,163,0.15); border:1px solid rgba(255,79,163,0.3); color:#ffaad4; }
+
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    Scrum<span>Flow</span>
+  </div>
+  <div class="nav-tabs-custom" id="mainNav">
+    <button class="nav-tab active" data-section="board"><i class="fa fa-th-large"></i> <span>Board</span></button>
+    <button class="nav-tab" data-section="team"><i class="fa fa-users"></i> <span>Equipo</span></button>
+    <button class="nav-tab" data-section="metrics"><i class="fa fa-chart-line"></i> <span>Métricas</span></button>
+    <button class="nav-tab" data-section="ceremonies"><i class="fa fa-calendar-check"></i> <span>Ceremonias</span></button>
+  </div>
+  <div class="nav-actions">
+    <div class="sprint-badge sprint-badge-clickable" id="sprintBadge" title="Gestionar Sprints"><i class="fa fa-layer-group" style="margin-right:5px;font-size:0.65rem"></i>Sprint 1</div>
+    <div class="notif-bell-wrap"><button class="btn-icon" id="notifBtn" title="Notificaciones"><i class="fa fa-bell"></i><span class="notif-dot" id="notifDot"></span></button></div>
+    <button class="btn-icon" id="themeToggle" title="Toggle theme"><i class="fa fa-moon"></i></button>
+    <button class="btn-icon" id="btnNewTask" title="Nueva tarea"><i class="fa fa-plus"></i></button>
+  </div>
+</nav>
+
+<!-- SECTIONS -->
+<!-- BOARD -->
+<section class="page-section active" id="section-board">
+  <div class="sprint-progress">
+    <div class="progress-info">
+      <div class="progress-label">Progreso del Sprint</div>
+      <div class="progress-bar-outer"><div class="progress-bar-inner" id="sprintProgressBar" style="width:0%"></div></div>
+      <div class="progress-pct" id="sprintProgressPct">0%</div>
+    </div>
+    <div class="velocity-tags" id="velocityTags"></div>
+  </div>
+  <div class="section-header">
+    <div class="board-name-wrap">
+      <input type="text" class="board-name-input" id="boardNameInput" value="Tablero Kanban" title="Clic para renombrar">
+      <button class="rename-btn" id="renameBoardBtn"><i class="fa fa-pen"></i> Renombrar</button>
+      <button class="rename-btn" id="newBoardBtn" style="border-color:var(--accent3);color:var(--accent3)"><i class="fa fa-plus"></i> Nuevo Tablero</button>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="fa fa-search"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar tarea...">
+      </div>
+      <button class="filter-chip active" data-filter="all">Todas</button>
+      <button class="filter-chip" data-filter="critical">Crítica</button>
+      <button class="filter-chip" data-filter="high">Alta</button>
+      <button class="filter-chip" data-filter="medium">Media</button>
+      <button class="filter-chip" data-filter="low">Baja</button>
+    </div>
+  </div>
+  <div id="sprintPhaseBanner"></div>
+  <div class="kanban-board" id="kanbanBoard"></div>
+</section>
+
+<!-- TEAM -->
+<section class="page-section" id="section-team">
+  <div class="section-header">
+    <div class="section-title">Gestión de <span>Equipo</span></div>
+    <button class="btn-primary-custom" style="width:auto;padding:8px 16px" id="btnAddMember"><i class="fa fa-plus"></i> Agregar miembro</button>
+  </div>
+  <div class="team-grid" id="teamGrid"></div>
+</section>
+
+<!-- METRICS -->
+<section class="page-section" id="section-metrics">
+  <div class="section-header">
+    <div class="section-title">Métricas del <span>Sprint</span></div>
+  </div>
+  <div class="metrics-grid" id="metricsGrid"></div>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">// BURNDOWN CHART</div>
+      <canvas id="burndownChart" height="260"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">// DISTRIBUCIÓN DE TAREAS</div>
+      <canvas id="taskDistChart" height="260"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">// VELOCITY POR ÉPICA</div>
+      <canvas id="epicChart" height="260"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">// PRIORIDAD DE TAREAS</div>
+      <canvas id="priorityChart" height="260"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- CEREMONIES -->
+<section class="page-section" id="section-ceremonies">
+  <div class="section-header">
+    <div class="section-title">Ceremonias <span>Scrum</span></div>
+    <button class="btn-primary-custom" style="width:auto;padding:8px 16px" id="btnAddCeremony"><i class="fa fa-plus"></i> Agregar ceremonia</button>
+  </div>
+  <div class="ceremony-grid" id="ceremonyGrid"></div>
+</section>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"></div>
+
+<!-- TASK PANEL -->
+<div class="side-panel" id="taskPanel">
+  <div class="panel-header">
+    <div class="panel-title" id="panelTitle">// NUEVA TAREA</div>
+    <button class="panel-close" id="closeTaskPanel"><i class="fa fa-times"></i></button>
+  </div>
+  <input type="hidden" id="taskId">
+  <div class="form-group">
+    <label class="form-label">Título *</label>
+    <input type="text" class="form-control" id="taskTitle" placeholder="Descripción breve de la tarea">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Épica</label>
+    <input type="text" class="form-control" id="taskEpic" placeholder="Ej: Autenticación de Usuarios">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Feature</label>
+    <input type="text" class="form-control" id="taskFeature" placeholder="Ej: Login con OAuth">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Historia de Usuario</label>
+    <textarea class="form-control" id="taskStory" placeholder="Como [usuario], quiero [acción], para [beneficio]"></textarea>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-group">
+      <label class="form-label">Story Points</label>
+      <select class="form-select" id="taskPoints">
+        <option>1</option><option>2</option><option>3</option><option selected>5</option><option>8</option><option>13</option><option>21</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Prioridad</label>
+      <select class="form-select" id="taskPriority">
+        <option value="critical">Crítica</option>
+        <option value="high">Alta</option>
+        <option value="medium" selected>Media</option>
+        <option value="low">Baja</option>
+      </select>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-group">
+      <label class="form-label">Estado</label>
+      <select class="form-select" id="taskStatus">
+        <option value="backlog">Backlog</option>
+        <option value="todo">To Do</option>
+        <option value="code">In Progress (Code)</option>
+        <option value="design">In Progress (Design)</option>
+        <option value="review">Review</option>
+        <option value="testing">Testing</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Asignado a</label>
+      <select class="form-select" id="taskAssignee"></select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Fecha límite</label>
+    <input type="date" class="form-control" id="taskDeadline">
+  </div>
+  <button class="btn-primary-custom" id="saveTask">Guardar Tarea</button>
+</div>
+
+<!-- TEAM PANEL -->
+<div class="side-panel" id="teamPanel">
+  <div class="panel-header">
+    <div class="panel-title">// NUEVO MIEMBRO</div>
+    <button class="panel-close" id="closeTeamPanel"><i class="fa fa-times"></i></button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Nombre completo *</label>
+    <input type="text" class="form-control" id="memberName" placeholder="Ej: Ana García">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Email</label>
+    <input type="email" class="form-control" id="memberEmail" placeholder="ana@empresa.com">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Rol</label>
+    <select class="form-select" id="memberRole">
+      <option value="sm">Scrum Master</option>
+      <option value="po">Product Owner</option>
+      <option value="dev">Developer</option>
+      <option value="qa">QA Engineer</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Emoji de Avatar</label>
+    <input type="text" class="form-control" id="memberAvatar" placeholder="🧑‍💻" maxlength="4">
+  </div>
+  <button class="btn-primary-custom" id="saveMember">Agregar Miembro</button>
+</div>
+
+<!-- CEREMONY PANEL -->
+<div class="side-panel" id="ceremonyPanel">
+  <div class="panel-header">
+    <div class="panel-title">// NUEVA CEREMONIA</div>
+    <button class="panel-close" id="closeCeremonyPanel"><i class="fa fa-times"></i></button>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Tipo de Ceremonia</label>
+    <select class="form-select" id="ceremonyType">
+      <option value="planning">Sprint Planning</option>
+      <option value="daily">Daily Stand-up</option>
+      <option value="review">Sprint Review</option>
+      <option value="retro">Retrospective</option>
+      <option value="refinement">Backlog Refinement</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Título / Objetivo</label>
+    <input type="text" class="form-control" id="ceremonyTitle" placeholder="Ej: Planning Sprint 2 - Q3">
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input type="date" class="form-control" id="ceremonyDate">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hora</label>
+      <input type="time" class="form-control" id="ceremonyTime">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Duración estimada</label>
+    <select class="form-select" id="ceremonyDuration">
+      <option>15 min</option><option>30 min</option><option>1 hora</option><option>2 horas</option><option>4 horas</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Notas / Agenda</label>
+    <textarea class="form-control" id="ceremonyNotes" placeholder="Objetivos, agenda o notas de la ceremonia..." style="min-height:120px"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Estado</label>
+    <select class="form-select" id="ceremonyStatus">
+      <option value="scheduled">Programada</option>
+      <option value="completed">Completada</option>
+      <option value="cancelled">Cancelada</option>
+    </select>
+  </div>
+  <button class="btn-primary-custom" id="saveCeremony">Guardar Ceremonia</button>
+</div>
+
+<!-- SPRINT MANAGER MODAL -->
+<div class="modal-backdrop" id="sprintModal">
+  <div class="sprint-modal">
+    <div class="modal-header">
+      <div class="modal-title">⚡ Gestión de Sprints</div>
+      <button class="panel-close" id="closeSprintModal"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="sprint-list" id="sprintList"></div>
+      <hr class="sprint-form-divider">
+      <div class="sprint-form-title">// CREAR NUEVO SPRINT</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-control" id="newSprintName" placeholder="Ej: Sprint 2"></div>
+        <div class="form-group"><label class="form-label">Duración (días)</label><select class="form-select" id="newSprintDuration"><option value="7">7 días</option><option value="10">10 días</option><option value="14" selected>14 días</option><option value="21">21 días</option></select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label class="form-label">Fecha de Inicio</label><input type="date" class="form-control" id="newSprintStart"></div>
+        <div class="form-group"><label class="form-label">Sprint Goal</label><input type="text" class="form-control" id="newSprintGoal" placeholder="Objetivo del sprint"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary-custom" style="flex:1" id="createSprintBtn"><i class="fa fa-plus"></i> Crear Sprint</button>
+      <button class="btn-ghost" id="closeSprintModal2">Cerrar</button>
+    </div>
+  </div>
+</div>
+<!-- MOVE TASKS MODAL -->
+<div class="modal-backdrop" id="moveTasksModal">
+  <div class="sprint-modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">🔀 Mover Tareas al Sprint</div>
+      <button class="panel-close" id="closeMoveModal"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:10px">Mover tareas a: <strong id="moveTargetSprintName" style="color:var(--accent)"></strong></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="filter-chip active" id="moveFilterAll">Todas</button>
+        <button class="filter-chip" id="moveFilterBacklog">Backlog</button>
+        <button class="filter-chip" id="moveFilterDone">Done</button>
+        <span id="moveSelectedCount" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);margin-left:auto;align-self:center">0 sel.</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px" id="selectAllMove">✓ Todos</button>
+        <button class="btn-ghost" style="font-size:0.75rem;padding:5px 10px" id="selectNoneMove">✗ Ninguno</button>
+      </div>
+      <div class="move-tasks-list" id="moveTasksList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary-custom" style="flex:1" id="confirmMoveBtn"><i class="fa fa-arrows-alt"></i> Mover Seleccionadas</button>
+      <button class="btn-ghost" id="closeMoveModal2">Cancelar</button>
+    </div>
+  </div>
+</div>
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <span class="notif-title">🔔 Notificaciones</span>
+    <button class="notif-clear" id="clearNotifs">Limpiar todo</button>
+  </div>
+  <div class="notif-list" id="notifList">
+    <div class="notif-empty">Sin notificaciones</div>
+  </div>
+</div>
+
+<!-- CREATE FROM SCRATCH MODAL -->
+<div class="modal-backdrop" id="scratchModal">
+  <div class="sprint-modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">🆕 Crear Nuevo Tablero</div>
+      <button class="panel-close" id="closeScratchModal"><i class="fa fa-times"></i></button>
+    </div>
+    <div class="modal-body scratch-modal-body">
+      <div>
+        <div class="form-section-label">Nombre del tablero</div>
+        <input type="text" class="form-control" id="scratchBoardName" placeholder="Ej: Proyecto Alpha, App Mobile...">
+      </div>
+      <div>
+        <div class="form-section-label">Plantilla base</div>
+        <div id="scratchTemplates">
+          <div class="scratch-template selected" data-tpl="scrum">
+            <div class="scratch-template-icon">⚡</div>
+            <div class="scratch-template-info"><h4>Scrum Completo</h4><p>Backlog → To Do → Code → Design → Review → Testing → Done</p></div>
+          </div>
+          <div class="scratch-template" data-tpl="kanban">
+            <div class="scratch-template-icon">📋</div>
+            <div class="scratch-template-info"><h4>Kanban Simple</h4><p>Por Hacer → En Progreso → Bloqueado → Hecho</p></div>
+          </div>
+          <div class="scratch-template" data-tpl="custom">
+            <div class="scratch-template-icon">🎨</div>
+            <div class="scratch-template-info"><h4>Personalizado</h4><p>Define tus propias columnas</p></div>
+          </div>
+        </div>
+      </div>
+      <div id="customColsSection" style="display:none">
+        <div class="form-section-label">Columnas personalizadas</div>
+        <div class="col-editor" id="customColsList"></div>
+        <button class="add-col-btn" id="addCustomCol" style="margin-top:6px"><i class="fa fa-plus"></i> Agregar columna</button>
+      </div>
+      <div>
+        <div class="form-section-label">Sprint inicial</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <input type="text" class="form-control" id="scratchSprintName" placeholder="Nombre del sprint (ej: Sprint 1)">
+          <select class="form-select" id="scratchSprintDur">
+            <option value="7">7 días</option><option value="14" selected>14 días</option><option value="21">21 días</option>
+          </select>
+        </div>
+      </div>
+      <div style="background:rgba(180,80,255,0.08);border:1px solid var(--border);border-radius:8px;padding:12px">
+        <div style="font-size:0.72rem;color:var(--warning);margin-bottom:4px"><i class="fa fa-exclamation-triangle"></i> Atención</div>
+        <div style="font-size:0.78rem;color:var(--text-secondary)">Crear un nuevo tablero desde cero <strong>reemplazará</strong> el tablero actual y todos sus datos. Esta acción no se puede deshacer.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary-custom" style="flex:1;background:linear-gradient(135deg,#b44fff,#ff4fa3)" id="confirmScratchBtn"><i class="fa fa-rocket"></i> Crear Tablero</button>
+      <button class="btn-ghost" id="closeScratchModal2">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ============================================================
+// MODEL
+// ============================================================
+const Model = {
+  sprints: [],
+  activeSprint: null,
+  tasks: [],
+  team: [],
+  ceremonies: [],
+
+  get sprint() {
+    return this.sprints.find(s => s.id === this.activeSprint) || this.sprints[0] || { name:'Sin sprint', startDate: new Date().toISOString().split('T')[0], durationDays:14 };
+  },
+
+  get currentTasks() {
+    return this.tasks.filter(t => t.sprintId === this.activeSprint);
+  },
+
+  save() {
+    try {
+      localStorage.setItem('sf_tasks', JSON.stringify(this.tasks));
+      localStorage.setItem('sf_team', JSON.stringify(this.team));
+      localStorage.setItem('sf_ceremonies', JSON.stringify(this.ceremonies));
+      localStorage.setItem('sf_sprints', JSON.stringify(this.sprints));
+      localStorage.setItem('sf_activeSprint', this.activeSprint || '');
+    } catch(e) {}
+  },
+
+  load() {
+    try {
+      const t = localStorage.getItem('sf_tasks');
+      const tm = localStorage.getItem('sf_team');
+      const c = localStorage.getItem('sf_ceremonies');
+      const sp = localStorage.getItem('sf_sprints');
+      const as2 = localStorage.getItem('sf_activeSprint');
+      if(t) this.tasks = JSON.parse(t);
+      if(tm) this.team = JSON.parse(tm);
+      if(c) this.ceremonies = JSON.parse(c);
+      if(sp) this.sprints = JSON.parse(sp);
+      if(as2) this.activeSprint = as2;
+      const oldSprint = localStorage.getItem('sf_sprint');
+      if(oldSprint && !sp) {
+        const os = JSON.parse(oldSprint);
+        this.sprints = [{ id:'s1', name: os.name||'Sprint 1', startDate: os.startDate, durationDays: os.durationDays||14, goal:'', status:'active' }];
+        this.activeSprint = 's1';
+        this.tasks.forEach(t => { if(!t.sprintId) t.sprintId = 's1'; });
+        localStorage.removeItem('sf_sprint');
+        this.save();
+      }
+    } catch(e) {}
+    if(!this.sprints.length) this._seed();
+  },
+
+  _seed() {
+    const now = new Date();
+    const fmt = d => d.toISOString().split('T')[0];
+    const dl = (days) => fmt(new Date(now.getTime() + days*86400000));
+    this.sprints = [
+      { id:'s1', name:'Sprint 1', startDate: fmt(new Date(now.getTime()-7*86400000)), durationDays:14, goal:'Establecer fundamentos de la arquitectura', status:'active' },
+      { id:'s2', name:'Sprint 2', startDate: dl(7), durationDays:14, goal:'Implementar módulo de usuarios completo', status:'planned' },
+    ];
+    this.activeSprint = 's1';
+    this.team = [
+      { id: 't1', name: 'Carlos López', role: 'sm', email: 'carlos@team.com', avatar: '🧑‍💼' },
+      { id: 't2', name: 'Ana Martínez', role: 'po', email: 'ana@team.com', avatar: '👩‍💻' },
+      { id: 't3', name: 'Diego Ruiz', role: 'dev', email: 'diego@team.com', avatar: '👨‍🔧' },
+      { id: 't4', name: 'Sofía Gómez', role: 'qa', email: 'sofia@team.com', avatar: '🧪' },
+    ];
+    this.tasks = [
+      { id:'k1', sprintId:'s1', title:'Setup CI/CD pipeline', epic:'DevOps', feature:'Automatización', story:'Como dev, quiero pipelines automáticos para desplegar sin fricción', points:8, priority:'high', status:'done', assignee:'t3', deadline:dl(-2), created:Date.now() },
+      { id:'k2', sprintId:'s1', title:'Diseño sistema de autenticación', epic:'Seguridad', feature:'Auth OAuth2', story:'Como usuario, quiero iniciar sesión con Google para acceso rápido', points:13, priority:'critical', status:'code', assignee:'t3', deadline:dl(3), created:Date.now() },
+      { id:'k3', sprintId:'s1', title:'Wireframes del Dashboard', epic:'UI/UX', feature:'Dashboard', story:'Como admin, quiero ver métricas del negocio en un panel centralizado', points:5, priority:'high', status:'design', assignee:'t2', deadline:dl(2), created:Date.now() },
+      { id:'k4', sprintId:'s1', title:'API REST Usuarios', epic:'Backend', feature:'User Management', story:'Como sistema, necesito endpoints CRUD para gestionar usuarios', points:8, priority:'critical', status:'review', assignee:'t3', deadline:dl(1), created:Date.now() },
+      { id:'k5', sprintId:'s1', title:'Tests unitarios Auth', epic:'QA', feature:'Auth OAuth2', story:'Como QA, quiero cobertura del 80% en módulo de autenticación', points:5, priority:'medium', status:'testing', assignee:'t4', deadline:dl(4), created:Date.now() },
+      { id:'k6', sprintId:'s1', title:'Migración base de datos', epic:'DevOps', feature:'DB Schema', story:'Como DBA, quiero migrar a PostgreSQL 15 sin pérdida de datos', points:3, priority:'high', status:'todo', assignee:'t3', deadline:dl(7), created:Date.now() },
+      { id:'k7', sprintId:'s1', title:'Documentación API Swagger', epic:'Backend', feature:'Docs', story:'Como dev externo, quiero documentación interactiva de la API', points:3, priority:'low', status:'backlog', assignee:'t2', deadline:dl(10), created:Date.now() },
+      { id:'k8', sprintId:'s1', title:'Notificaciones en tiempo real', epic:'Frontend', feature:'Notifications', story:'Como usuario, quiero recibir alertas push sin recargar la página', points:13, priority:'medium', status:'backlog', assignee:'t3', deadline:dl(14), created:Date.now() },
+      { id:'k9', sprintId:'s1', title:'Panel de administración', epic:'UI/UX', feature:'Admin Panel', story:'Como admin, quiero gestionar usuarios y permisos desde una interfaz', points:8, priority:'high', status:'todo', assignee:'t2', deadline:dl(8), created:Date.now() },
+      { id:'k10', sprintId:'s2', title:'Módulo de perfiles de usuario', epic:'Frontend', feature:'Profiles', story:'Como usuario, quiero editar mi perfil y foto', points:5, priority:'medium', status:'backlog', assignee:'t3', deadline:dl(20), created:Date.now() },
+      { id:'k11', sprintId:'s2', title:'Sistema de permisos RBAC', epic:'Seguridad', feature:'Auth', story:'Como admin, quiero asignar roles granulares a usuarios', points:8, priority:'high', status:'backlog', assignee:'t3', deadline:dl(21), created:Date.now() },
+    ];
+    this.ceremonies = [
+      { id:'c1', type:'planning', title:'Sprint 1 Planning', date: fmt(now), time:'09:00', duration:'4 horas', notes:'Seleccionar items del Product Backlog para el Sprint.\nEstimar Story Points.\nDefinir Sprint Goal.', status:'completed' },
+      { id:'c2', type:'daily', title:'Daily Stand-up #3', date: dl(0), time:'09:15', duration:'15 min', notes:'¿Qué hice ayer?\n¿Qué haré hoy?\n¿Hay impedimentos?', status:'scheduled' },
+      { id:'c3', type:'review', title:'Sprint 1 Review', date: dl(7), time:'14:00', duration:'2 horas', notes:'Demostrar funcionalidades completadas al Product Owner y stakeholders.', status:'scheduled' },
+      { id:'c4', type:'retro', title:'Sprint 1 Retrospective', date: dl(8), time:'16:00', duration:'1 hora', notes:'¿Qué salió bien?\n¿Qué mejorar?\n¿Qué acciones tomar?', status:'scheduled' },
+    ];
+    this.save();
+  },
+
+  addTask(task) { this.tasks.push(task); this.save(); },
+  updateTask(id, data) {
+    const idx = this.tasks.findIndex(t => t.id === id);
+    if(idx !== -1) { this.tasks[idx] = { ...this.tasks[idx], ...data }; this.save(); }
+  },
+  deleteTask(id) { this.tasks = this.tasks.filter(t => t.id !== id); this.save(); },
+  getTask(id) { return this.tasks.find(t => t.id === id); },
+  addMember(m) { this.team.push(m); this.save(); },
+  deleteMember(id) { this.team = this.team.filter(m => m.id !== id); this.save(); },
+  addCeremony(c) { this.ceremonies.push(c); this.save(); },
+  deleteCeremony(id) { this.ceremonies = this.ceremonies.filter(c => c.id !== id); this.save(); },
+
+  // Sprint management
+  addSprint(sp) { this.sprints.push(sp); this.save(); },
+  deleteSprint(id) {
+    if(this.sprints.length <= 1) return false;
+    this.sprints = this.sprints.filter(s => s.id !== id);
+    if(this.activeSprint === id) this.activeSprint = this.sprints[0].id;
+    this.tasks = this.tasks.filter(t => t.sprintId !== id); // remove orphan tasks
+    this.save(); return true;
+  },
+  switchSprint(id) { this.activeSprint = id; this.save(); },
+  closeSprint(id) {
+    const sp = this.sprints.find(s => s.id === id);
+    if(sp) { sp.status = 'closed'; this.save(); }
+  },
+  moveTasksToSprint(taskIds, targetSprintId) {
+    taskIds.forEach(id => {
+      const t = this.tasks.find(t => t.id === id);
+      if(t) { t.sprintId = targetSprintId; t.status = 'backlog'; }
+    });
+    this.save();
+  },
+  getSprintStats(sprintId) {
+    const tasks = this.tasks.filter(t => t.sprintId === sprintId);
+    const total = tasks.length;
+    const done = tasks.filter(t => t.status === 'done').length;
+    const inProgress = tasks.filter(t => ['code','design','review','testing'].includes(t.status)).length;
+    const totalPoints = tasks.reduce((s,t) => s + parseInt(t.points||0), 0);
+    const donePoints = tasks.filter(t => t.status === 'done').reduce((s,t) => s + parseInt(t.points||0), 0);
+    const pct = total ? Math.round(done/total*100) : 0;
+    return { total, done, inProgress, totalPoints, donePoints, pct, backlog: tasks.filter(t=>t.status==='backlog').length };
+  },
+  getStats() { return this.getSprintStats(this.activeSprint); }
+};
+
+// ============================================================
+// VIEW
+// ============================================================
+const View = {
+  COLUMNS: [
+    { id:'backlog', name:'Backlog', cls:'col-backlog', icon:'fa-inbox' },
+    { id:'todo', name:'To Do', cls:'col-todo', icon:'fa-list-check' },
+    { id:'code', name:'In Progress — Code', cls:'col-code', icon:'fa-code' },
+    { id:'design', name:'In Progress — Design', cls:'col-design', icon:'fa-pen-ruler' },
+    { id:'review', name:'Review', cls:'col-review', icon:'fa-eye' },
+    { id:'testing', name:'Testing', cls:'col-testing', icon:'fa-flask' },
+    { id:'done', name:'Done', cls:'col-done', icon:'fa-check-circle' },
+  ],
+
+  renderBoard(tasks, filter='all', search='') {
+    const board = document.getElementById('kanbanBoard');
+    board.innerHTML = '';
+    this.COLUMNS.forEach(col => {
+      let colTasks = tasks.filter(t => t.status === col.id);
+      if(filter !== 'all') colTasks = colTasks.filter(t => t.priority === filter);
+      if(search) colTasks = colTasks.filter(t => t.title.toLowerCase().includes(search.toLowerCase()) || (t.epic||'').toLowerCase().includes(search.toLowerCase()));
+      const div = document.createElement('div');
+      div.className = `kanban-col ${col.cls}`;
+      div.dataset.col = col.id;
+      div.innerHTML = `
+        <div class="col-header">
+          <span class="col-name"><i class="fa ${col.icon}" style="margin-right:6px;opacity:0.7"></i>${col.name}</span>
+          <span class="col-count">${colTasks.length}</span>
+        </div>
+        <div class="col-body" data-col="${col.id}">
+          ${colTasks.map(t => this.renderTaskCard(t)).join('')}
+          <button class="add-task-btn" data-col="${col.id}"><i class="fa fa-plus"></i> Agregar tarea</button>
+        </div>`;
+      board.appendChild(div);
+    });
+  },
+
+  renderTaskCard(task) {
+    const member = Model.team.find(m => m.id === task.assignee);
+    const initials = member ? (member.avatar || member.name.split(' ').map(n=>n[0]).join('').slice(0,2)) : '?';
+    const isOverdue = task.deadline && new Date(task.deadline) < new Date() && task.status !== 'done';
+    return `
+    <div class="task-card priority-${task.priority}" draggable="true" data-id="${task.id}">
+      <div class="task-epic">${task.epic || 'Sin épica'}</div>
+      <div class="task-title">${task.title}</div>
+      ${task.story ? `<div class="task-story">${task.story.length>80?task.story.slice(0,80)+'…':task.story}</div>` : ''}
+      <div class="task-meta">
+        <span class="task-points">${task.points} SP</span>
+        <span class="task-priority priority-${task.priority}">${task.priority}</span>
+        ${member ? `<span class="task-assignee" title="${member.name}">${initials}</span>` : ''}
+      </div>
+      ${task.deadline ? `<div class="task-date" style="${isOverdue?'color:var(--danger)':''}"><i class="fa fa-calendar"></i>${task.deadline}${isOverdue?' ⚠️':''}</div>` : ''}
+      <div class="task-actions">
+        <button class="task-btn" data-edit="${task.id}"><i class="fa fa-pen"></i> Editar</button>
+        <button class="task-btn del" data-del="${task.id}"><i class="fa fa-trash"></i></button>
+      </div>
+    </div>`;
+  },
+
+  renderTeam(team) {
+    const g = document.getElementById('teamGrid');
+    if(!team.length) { g.innerHTML = '<div class="empty-state"><i class="fa fa-users"></i><p>No hay miembros en el equipo</p></div>'; return; }
+    const roleMap = { sm:'Scrum Master', po:'Product Owner', dev:'Developer', qa:'QA Engineer' };
+    const roleColors = { sm:'role-sm', po:'role-po', dev:'role-dev', qa:'role-qa' };
+    g.innerHTML = team.map(m => `
+      <div class="member-card">
+        <button class="member-del" data-del="${m.id}"><i class="fa fa-times"></i></button>
+        <div class="member-avatar">${m.avatar || m.name[0]}</div>
+        <div class="member-name">${m.name}</div>
+        <div class="member-role ${roleColors[m.role]}">${roleMap[m.role]||m.role}</div>
+        <div class="member-email">${m.email||''}</div>
+      </div>`).join('');
+  },
+
+  renderCeremonies(ceremonies) {
+    const g = document.getElementById('ceremonyGrid');
+    if(!ceremonies.length) { g.innerHTML = '<div class="empty-state"><i class="fa fa-calendar"></i><p>No hay ceremonias agendadas</p></div>'; return; }
+    const cfg = {
+      planning: { icon:'📋', color:'rgba(99,120,255,0.15)', label:'Sprint Planning' },
+      daily:    { icon:'☀️', color:'rgba(255,209,102,0.15)', label:'Daily Stand-up' },
+      review:   { icon:'🔍', color:'rgba(100,181,246,0.15)', label:'Sprint Review' },
+      retro:    { icon:'🔄', color:'rgba(0,212,170,0.15)', label:'Retrospective' },
+      refinement:{ icon:'🎯', color:'rgba(199,120,221,0.15)', label:'Backlog Refinement' },
+    };
+    const statusMap = { scheduled:'Programada', completed:'Completada', cancelled:'Cancelada' };
+    g.innerHTML = ceremonies.map(c => {
+      const cf = cfg[c.type]||cfg.daily;
+      return `
+      <div class="ceremony-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between">
+          <div class="ceremony-icon" style="background:${cf.color}">${cf.icon}</div>
+          <button class="ceremony-del" data-del="${c.id}"><i class="fa fa-times"></i></button>
+        </div>
+        <div class="ceremony-type">${cf.label}</div>
+        <div class="ceremony-title">${c.title}<span class="ceremony-status status-${c.status}">${statusMap[c.status]||c.status}</span></div>
+        <div class="ceremony-date"><i class="fa fa-calendar"></i>${c.date||'Sin fecha'} ${c.time?'a las '+c.time:''} — ${c.duration||''}</div>
+        ${c.notes ? `<div class="ceremony-notes">${c.notes.replace(/\n/g,'<br>')}</div>` : ''}
+      </div>`;
+    }).join('');
+  },
+
+  renderMetrics(stats) {
+    const g = document.getElementById('metricsGrid');
+    const cards = [
+      { val: stats.total, label:'Total Tareas', color:'var(--accent)' },
+      { val: stats.done, label:'Completadas', color:'var(--success)' },
+      { val: stats.inProgress, label:'En Progreso', color:'var(--warning)' },
+      { val: stats.backlog, label:'En Backlog', color:'var(--text-muted)' },
+      { val: stats.totalPoints, label:'Total Story Points', color:'var(--accent)' },
+      { val: stats.donePoints, label:'SP Completados', color:'var(--success)' },
+      { val: `${stats.pct}%`, label:'Completitud', color:'var(--accent2)' },
+      { val: Model.team.length, label:'Miembros', color:'var(--info)' },
+    ];
+    g.innerHTML = cards.map(c => `
+      <div class="metric-card">
+        <div class="metric-value" style="color:${c.color}">${c.val}</div>
+        <div class="metric-label">${c.label}</div>
+      </div>`).join('');
+  },
+
+  renderProgress(stats) {
+    document.getElementById('sprintProgressBar').style.width = stats.pct + '%';
+    document.getElementById('sprintProgressPct').textContent = stats.pct + '% completado';
+    const sp = Model.sprint;
+    document.getElementById('sprintBadge').innerHTML = `<i class="fa fa-layer-group" style="margin-right:5px;font-size:0.65rem"></i>${sp.name}`;
+    const statusIcon = { active:'🟢', closed:'✅', planned:'🔵' }[sp.status] || '⚪';
+    document.getElementById('velocityTags').innerHTML = `
+      <span class="velocity-tag">${statusIcon} <strong>${sp.name}</strong></span>
+      <span class="velocity-tag"><strong>${stats.totalPoints}</strong> SP Total</span>
+      <span class="velocity-tag"><strong>${stats.donePoints}</strong> SP Done</span>
+      <span class="velocity-tag"><strong>${stats.total - stats.done}</strong> restantes</span>
+    `;
+  },
+
+  populateAssigneeSelect() {
+    const sel = document.getElementById('taskAssignee');
+    sel.innerHTML = '<option value="">Sin asignar</option>' + Model.team.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  },
+};
+
+// ============================================================
+// CHARTS
+// ============================================================
+let charts = {};
+const CHART_DEFAULTS = {
+  color: (ctx) => '#' + ['6378ff','00d4aa','ffd166','ff6b6b','64b5f6','c778dd','4caf50'][ctx.dataIndex % 7],
+  font: { family: "'Space Mono', monospace", size: 10 },
+  textColor: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#8892b0',
+};
+
+function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderCharts() {
+  const tasks = Model.tasks;
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const textColor = isDark ? '#8892b0' : '#4a5370';
+  const gridColor = isDark ? 'rgba(99,120,255,0.1)' : 'rgba(99,120,255,0.15)';
+  const bg = isDark ? '#161b2e' : '#ffffff';
+
+  Chart.defaults.color = textColor;
+  Chart.defaults.font.family = "'Space Mono', monospace";
+  Chart.defaults.font.size = 10;
+
+  // BURNDOWN
+  destroyChart('burndown');
+  const startDate = new Date(Model.sprint.startDate);
+  const dur = Model.sprint.durationDays || 14;
+  const totalSP = tasks.reduce((s,t) => s+parseInt(t.points||0), 0);
+  const labels = Array.from({length:dur+1},(_,i) => {
+    if(i===0) return 'Day 0';
+    return `D${i}`;
+  });
+  const ideal = labels.map((_,i) => Math.round(totalSP - (totalSP/dur)*i));
+  const today = Math.min(dur, Math.round((Date.now() - startDate.getTime())/86400000));
+  const actual = Array.from({length:today+1},(_,i) => {
+    const pct = Math.max(0, 1 - (i/dur));
+    const noise = (Math.random()-0.5)*totalSP*0.05;
+    return Math.round(Math.max(0, totalSP * pct + noise));
+  });
+  if(today < dur) {
+    actual[actual.length-1] = tasks.filter(t => t.status !== 'done').reduce((s,t) => s+parseInt(t.points||0), 0);
+  }
+  charts['burndown'] = new Chart(document.getElementById('burndownChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Ideal', data:ideal, borderColor:'rgba(99,120,255,0.4)', borderDash:[6,4], pointRadius:0, tension:0.1 },
+        { label:'Real', data:actual, borderColor:'#00d4aa', backgroundColor:'rgba(0,212,170,0.1)', pointBackgroundColor:'#00d4aa', pointRadius:3, fill:true, tension:0.3 },
+      ]
+    },
+    options: { responsive:true, plugins:{ legend:{ labels:{ color:textColor }}}, scales:{ x:{grid:{color:gridColor},ticks:{color:textColor}}, y:{grid:{color:gridColor},ticks:{color:textColor}} } }
+  });
+
+  // TASK DISTRIBUTION (donut)
+  destroyChart('taskDist');
+  const statusCount = View.COLUMNS.map(c => tasks.filter(t => t.status === c.id).length);
+  charts['taskDist'] = new Chart(document.getElementById('taskDistChart'), {
+    type: 'doughnut',
+    data: {
+      labels: View.COLUMNS.map(c => c.name),
+      datasets: [{ data:statusCount, backgroundColor:['#4a5370','#ffd166','#6378ff','#c778dd','#64b5f6','#00d4aa','#4caf50'], borderWidth:0 }]
+    },
+    options: { responsive:true, cutout:'65%', plugins:{ legend:{ position:'right', labels:{ color:textColor, padding:10 }}}}
+  });
+
+  // EPIC VELOCITY
+  destroyChart('epic');
+  const epics = [...new Set(tasks.map(t => t.epic).filter(Boolean))].slice(0,6);
+  const epicPoints = epics.map(ep => tasks.filter(t=>t.epic===ep).reduce((s,t)=>s+parseInt(t.points||0),0));
+  charts['epic'] = new Chart(document.getElementById('epicChart'), {
+    type: 'bar',
+    data: {
+      labels: epics,
+      datasets: [{ label:'Story Points', data:epicPoints, backgroundColor:'rgba(99,120,255,0.6)', borderColor:'#6378ff', borderWidth:1, borderRadius:4 }]
+    },
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:gridColor},ticks:{color:textColor}}, y:{grid:{color:gridColor},ticks:{color:textColor}}}}
+  });
+
+  // PRIORITY
+  destroyChart('priority');
+  const priMap = {critical:'Crítica', high:'Alta', medium:'Media', low:'Baja'};
+  const pris = ['critical','high','medium','low'];
+  charts['priority'] = new Chart(document.getElementById('priorityChart'), {
+    type: 'polarArea',
+    data: {
+      labels: pris.map(p => priMap[p]),
+      datasets: [{ data: pris.map(p => tasks.filter(t=>t.priority===p).length), backgroundColor:['rgba(255,107,107,0.6)','rgba(255,209,102,0.6)','rgba(99,120,255,0.6)','rgba(0,212,170,0.6)'], borderWidth:0 }]
+    },
+    options: { responsive:true, plugins:{ legend:{ labels:{ color:textColor }}}}
+  });
+}
+
+// ============================================================
+// CONTROLLER
+// ============================================================
+const Controller = {
+  currentFilter: 'all',
+  currentSearch: '',
+  dragId: null,
+
+  init() {
+    Model.load();
+    this.bindNav();
+    this.bindBoard();
+    this.bindTeam();
+    this.bindCeremonies();
+    this.bindTheme();
+    this.bindSearch();
+    this.render();
+  },
+
+  render() {
+    const stats = Model.getStats();
+    View.renderProgress(stats);
+    if(typeof SprintPhase !== 'undefined') { SprintPhase.render(); SprintPhase.checkAndNotify(); }
+    if(typeof Notifications !== 'undefined') Notifications.checkOverdue();
+    View.renderBoard(Model.currentTasks, this.currentFilter, this.currentSearch);
+    View.renderTeam(Model.team);
+    View.renderCeremonies(Model.ceremonies);
+    View.renderMetrics(stats);
+    View.populateAssigneeSelect();
+    this.bindDragDrop();
+    this.bindTaskActions();
+    this.bindAddTaskBtns();
+    this.bindTeamActions();
+    this.bindCeremonyActions();
+  },
+
+  bindNav() {
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('section-' + tab.dataset.section).classList.add('active');
+        if(tab.dataset.section === 'metrics') setTimeout(renderCharts, 100);
+      });
+    });
+  },
+
+  bindSearch() {
+    document.getElementById('searchInput').addEventListener('input', e => {
+      this.currentSearch = e.target.value;
+      View.renderBoard(Model.currentTasks, this.currentFilter, this.currentSearch);
+      this.bindDragDrop(); this.bindTaskActions(); this.bindAddTaskBtns();
+    });
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        this.currentFilter = chip.dataset.filter;
+        View.renderBoard(Model.currentTasks, this.currentFilter, this.currentSearch);
+        this.bindDragDrop(); this.bindTaskActions(); this.bindAddTaskBtns();
+      });
+    });
+  },
+
+  bindDragDrop() {
+    document.querySelectorAll('.task-card').forEach(card => {
+      card.addEventListener('dragstart', e => {
+        this.dragId = card.dataset.id;
+        setTimeout(() => card.classList.add('dragging'), 0);
+      });
+      card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    });
+    document.querySelectorAll('.col-body').forEach(col => {
+      col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+      col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+      col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        if(this.dragId) {
+          Model.updateTask(this.dragId, { status: col.dataset.col });
+          this.dragId = null;
+          this.render();
+          this.showToast('Tarea movida', 'success');
+        }
+      });
+    });
+  },
+
+  bindTaskActions() {
+    document.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); this.openTaskPanel(btn.dataset.edit); });
+    });
+    document.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        if(confirm('¿Eliminar esta tarea?')) {
+          Model.deleteTask(btn.dataset.del);
+          this.render();
+          this.showToast('Tarea eliminada', 'info');
+        }
+      });
+    });
+  },
+
+  bindAddTaskBtns() {
+    document.querySelectorAll('.add-task-btn').forEach(btn => {
+      btn.addEventListener('click', () => this.openTaskPanel(null, btn.dataset.col));
+    });
+  },
+
+  bindBoard() {
+    document.getElementById('btnNewTask').addEventListener('click', () => this.openTaskPanel());
+    document.getElementById('closeTaskPanel').addEventListener('click', () => this.closePanels());
+    document.getElementById('overlay').addEventListener('click', () => this.closePanels());
+    document.getElementById('saveTask').addEventListener('click', () => this.saveTask());
+  },
+
+  openTaskPanel(id=null, defaultStatus='backlog') {
+    const panel = document.getElementById('taskPanel');
+    document.getElementById('panelTitle').textContent = id ? '// EDITAR TAREA' : '// NUEVA TAREA';
+    View.populateAssigneeSelect();
+    if(id) {
+      const task = Model.getTask(id);
+      if(!task) return;
+      document.getElementById('taskId').value = task.id;
+      document.getElementById('taskTitle').value = task.title;
+      document.getElementById('taskEpic').value = task.epic||'';
+      document.getElementById('taskFeature').value = task.feature||'';
+      document.getElementById('taskStory').value = task.story||'';
+      document.getElementById('taskPoints').value = task.points;
+      document.getElementById('taskPriority').value = task.priority;
+      document.getElementById('taskStatus').value = task.status;
+      document.getElementById('taskAssignee').value = task.assignee||'';
+      document.getElementById('taskDeadline').value = task.deadline||'';
+    } else {
+      document.getElementById('taskId').value = '';
+      document.getElementById('taskTitle').value = '';
+      document.getElementById('taskEpic').value = '';
+      document.getElementById('taskFeature').value = '';
+      document.getElementById('taskStory').value = '';
+      document.getElementById('taskPoints').value = '5';
+      document.getElementById('taskPriority').value = 'medium';
+      document.getElementById('taskStatus').value = defaultStatus;
+      document.getElementById('taskAssignee').value = '';
+      document.getElementById('taskDeadline').value = '';
+    }
+    panel.classList.add('open');
+    document.getElementById('overlay').classList.add('active');
+  },
+
+  saveTask() {
+    const title = document.getElementById('taskTitle').value.trim();
+    if(!title) { this.showToast('El título es obligatorio', 'error'); return; }
+    const id = document.getElementById('taskId').value;
+    const data = {
+      title, epic: document.getElementById('taskEpic').value.trim(),
+      feature: document.getElementById('taskFeature').value.trim(),
+      story: document.getElementById('taskStory').value.trim(),
+      points: document.getElementById('taskPoints').value,
+      priority: document.getElementById('taskPriority').value,
+      status: document.getElementById('taskStatus').value,
+      assignee: document.getElementById('taskAssignee').value,
+      deadline: document.getElementById('taskDeadline').value,
+    };
+    if(id) { Model.updateTask(id, data); this.showToast('Tarea actualizada', 'success'); }
+    else { const newTask = { id: 'k'+Date.now(), sprintId: Model.activeSprint, ...data, created: Date.now() }; Model.addTask(newTask); if(typeof Notifications !== 'undefined') Notifications.notifyNewTask(newTask); this.showToast('Tarea creada', 'success'); }
+    this.closePanels();
+    this.render();
+  },
+
+  bindTeam() {
+    document.getElementById('btnAddMember').addEventListener('click', () => {
+      document.getElementById('memberName').value='';
+      document.getElementById('memberEmail').value='';
+      document.getElementById('memberRole').value='dev';
+      document.getElementById('memberAvatar').value='';
+      document.getElementById('teamPanel').classList.add('open');
+      document.getElementById('overlay').classList.add('active');
+    });
+    document.getElementById('closeTeamPanel').addEventListener('click', () => this.closePanels());
+    document.getElementById('saveMember').addEventListener('click', () => {
+      const name = document.getElementById('memberName').value.trim();
+      if(!name) { this.showToast('El nombre es obligatorio', 'error'); return; }
+      Model.addMember({ id:'t'+Date.now(), name, email:document.getElementById('memberEmail').value.trim(), role:document.getElementById('memberRole').value, avatar:document.getElementById('memberAvatar').value||name[0] });
+      this.closePanels();
+      this.render();
+      this.showToast('Miembro agregado', 'success');
+    });
+  },
+
+  bindTeamActions() {
+    document.querySelectorAll('.member-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(confirm('¿Eliminar este miembro?')) {
+          Model.deleteMember(btn.dataset.del);
+          this.render();
+          this.showToast('Miembro eliminado', 'info');
+        }
+      });
+    });
+  },
+
+  bindCeremonies() {
+    document.getElementById('btnAddCeremony').addEventListener('click', () => {
+      document.getElementById('ceremonyType').value='planning';
+      document.getElementById('ceremonyTitle').value='';
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('ceremonyDate').value=today;
+      document.getElementById('ceremonyTime').value='09:00';
+      document.getElementById('ceremonyDuration').value='1 hora';
+      document.getElementById('ceremonyNotes').value='';
+      document.getElementById('ceremonyStatus').value='scheduled';
+      document.getElementById('ceremonyPanel').classList.add('open');
+      document.getElementById('overlay').classList.add('active');
+    });
+    document.getElementById('closeCeremonyPanel').addEventListener('click', () => this.closePanels());
+    document.getElementById('saveCeremony').addEventListener('click', () => {
+      const title = document.getElementById('ceremonyTitle').value.trim();
+      if(!title) { this.showToast('El título es obligatorio', 'error'); return; }
+      Model.addCeremony({ id:'c'+Date.now(), type:document.getElementById('ceremonyType').value, title, date:document.getElementById('ceremonyDate').value, time:document.getElementById('ceremonyTime').value, duration:document.getElementById('ceremonyDuration').value, notes:document.getElementById('ceremonyNotes').value.trim(), status:document.getElementById('ceremonyStatus').value });
+      this.closePanels();
+      this.render();
+      this.showToast('Ceremonia agendada', 'success');
+    });
+  },
+
+  bindCeremonyActions() {
+    document.querySelectorAll('.ceremony-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(confirm('¿Eliminar esta ceremonia?')) {
+          Model.deleteCeremony(btn.dataset.del);
+          this.render();
+          this.showToast('Ceremonia eliminada', 'info');
+        }
+      });
+    });
+  },
+
+  bindTheme() {
+    const btn = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('sf_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    btn.innerHTML = saved === 'dark' ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+    btn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('sf_theme', next);
+      btn.innerHTML = next === 'dark' ? '<i class="fa fa-moon"></i>' : '<i class="fa fa-sun"></i>';
+      if(document.getElementById('section-metrics').classList.contains('active')) renderCharts();
+    });
+  },
+
+  closePanels() {
+    document.querySelectorAll('.side-panel').forEach(p => p.classList.remove('open'));
+    document.getElementById('overlay').classList.remove('active');
+  },
+
+  showToast(msg, type='info') {
+    const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle' };
+    const colors = { success:'var(--success)', error:'var(--danger)', info:'var(--accent)' };
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fa ${icons[type]}" style="color:${colors[type]}"></i><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.transition='opacity 0.3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2500);
+  }
+};
+
+// ============================================================
+// SPRINT MANAGER CONTROLLER
+// ============================================================
+const SprintManager = {
+  moveTargetId: null,
+  moveFilterState: 'all',
+
+  init() {
+    document.getElementById('sprintBadge').addEventListener('click', () => this.openModal());
+    document.getElementById('closeSprintModal').addEventListener('click', () => this.closeModal());
+    document.getElementById('closeSprintModal2').addEventListener('click', () => this.closeModal());
+    document.getElementById('createSprintBtn').addEventListener('click', () => this.createSprint());
+    document.getElementById('closeMoveModal').addEventListener('click', () => this.closeMoveModal());
+    document.getElementById('closeMoveModal2').addEventListener('click', () => this.closeMoveModal());
+    document.getElementById('confirmMoveBtn').addEventListener('click', () => this.confirmMove());
+    document.getElementById('selectAllMove').addEventListener('click', () => this.selectAll(true));
+    document.getElementById('selectNoneMove').addEventListener('click', () => this.selectAll(false));
+
+    // Move filter chips
+    ['moveFilterAll','moveFilterBacklog','moveFilterDone'].forEach(id => {
+      document.getElementById(id).addEventListener('click', (e) => {
+        document.querySelectorAll('#moveTasksModal .filter-chip').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        const map = { moveFilterAll:'all', moveFilterBacklog:'backlog', moveFilterDone:'done' };
+        this.moveFilterState = map[id];
+        this.renderMoveTasksList();
+      });
+    });
+
+    // Set default start date for new sprint
+    const nextStart = new Date();
+    const active = Model.sprint;
+    if(active && active.startDate && active.durationDays) {
+      const end = new Date(new Date(active.startDate).getTime() + active.durationDays * 86400000);
+      nextStart.setTime(end.getTime() + 86400000);
+    }
+    document.getElementById('newSprintStart').value = nextStart.toISOString().split('T')[0];
+    const num = Model.sprints.length + 1;
+    document.getElementById('newSprintName').value = `Sprint ${num}`;
+  },
+
+  openModal() {
+    this.renderSprintList();
+    // Auto-fill next sprint number
+    const num = Model.sprints.length + 1;
+    document.getElementById('newSprintName').value = `Sprint ${num}`;
+    const active = Model.sprint;
+    if(active && active.startDate && active.durationDays) {
+      const end = new Date(new Date(active.startDate).getTime() + (parseInt(active.durationDays)+1) * 86400000);
+      document.getElementById('newSprintStart').value = end.toISOString().split('T')[0];
+    }
+    document.getElementById('sprintModal').classList.add('open');
+  },
+
+  closeModal() {
+    document.getElementById('sprintModal').classList.remove('open');
+  },
+
+  closeMoveModal() {
+    document.getElementById('moveTasksModal').classList.remove('open');
+  },
+
+  renderSprintList() {
+    const list = document.getElementById('sprintList');
+    if(!Model.sprints.length) { list.innerHTML = '<div class="empty-state"><i class="fa fa-layer-group"></i><p>No hay sprints</p></div>'; return; }
+
+    list.innerHTML = Model.sprints.map(sp => {
+      const stats = Model.getSprintStats(sp.id);
+      const isActive = sp.id === Model.activeSprint;
+      const statusCls = { active:'active-sprint', closed:'closed-sprint', planned:'planned-sprint' }[sp.status] || '';
+      const badgeCls = { active:'badge-active', closed:'badge-closed', planned:'badge-planned' }[sp.status] || '';
+      const statusLabel = { active:'Activo', closed:'Cerrado', planned:'Planificado' }[sp.status] || sp.status;
+      const taskCount = Model.tasks.filter(t => t.sprintId === sp.id).length;
+
+      return `<div class="sprint-item ${statusCls}" data-sprint-id="${sp.id}">
+        <div class="sprint-item-indicator"></div>
+        <div class="sprint-item-info">
+          <div class="sprint-item-name">
+            ${sp.name}
+            <span class="sprint-status-badge ${badgeCls}">${statusLabel}</span>
+            ${isActive ? '<span style="font-size:0.65rem;color:var(--accent2);margin-left:4px">← activo</span>' : ''}
+          </div>
+          <div class="sprint-item-meta">
+            <span><i class="fa fa-calendar" style="margin-right:3px"></i>${sp.startDate||'Sin fecha'}</span>
+            <span><i class="fa fa-clock" style="margin-right:3px"></i>${sp.durationDays} días</span>
+            <span><i class="fa fa-tasks" style="margin-right:3px"></i>${taskCount} tareas</span>
+            <span><i class="fa fa-star" style="margin-right:3px"></i>${stats.donePoints}/${stats.totalPoints} SP</span>
+          </div>
+          ${sp.goal ? `<div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;font-style:italic">🎯 ${sp.goal}</div>` : ''}
+          <div class="sprint-progress-mini"><div class="sprint-progress-mini-fill" style="width:${stats.pct}%"></div></div>
+        </div>
+        <div class="sprint-item-actions">
+          ${sp.status !== 'active' ? `<button class="btn-ghost" style="font-size:0.72rem;padding:5px 10px" data-switch="${sp.id}"><i class="fa fa-play"></i> Activar</button>` : ''}
+          ${sp.status === 'active' ? `<button class="btn-ghost" style="font-size:0.72rem;padding:5px 10px" data-close-sprint="${sp.id}"><i class="fa fa-check"></i> Cerrar</button>` : ''}
+          <button class="btn-ghost" style="font-size:0.72rem;padding:5px 10px" data-move-from="${sp.id}" title="Mover tareas a otro sprint"><i class="fa fa-arrows-alt"></i></button>
+          ${Model.sprints.length > 1 ? `<button class="btn-danger-ghost" data-del-sprint="${sp.id}"><i class="fa fa-trash"></i></button>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    // Bind actions
+    list.querySelectorAll('[data-switch]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        Model.switchSprint(btn.dataset.switch);
+        Controller.render();
+        this.renderSprintList();
+        Controller.showToast(`Sprint activado: ${Model.sprint.name}`, 'success');
+      });
+    });
+
+    list.querySelectorAll('[data-close-sprint]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if(confirm('¿Cerrar este sprint? Las tareas restantes quedarán en el sprint.')) {
+          Model.closeSprint(btn.dataset.closeSpint || btn.getAttribute('data-close-sprint'));
+          Controller.render();
+          this.renderSprintList();
+          Controller.showToast('Sprint cerrado', 'info');
+        }
+      });
+    });
+
+    list.querySelectorAll('[data-del-sprint]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const sp = Model.sprints.find(s => s.id === btn.dataset.delSprint || s.id === btn.getAttribute('data-del-sprint'));
+        const taskCount = Model.tasks.filter(t => t.sprintId === (btn.dataset.delSprint || btn.getAttribute('data-del-sprint'))).length;
+        if(confirm(`¿Eliminar ${sp?.name}? Se eliminarán ${taskCount} tareas asociadas.`)) {
+          const id = btn.dataset.delSprint || btn.getAttribute('data-del-sprint');
+          if(Model.deleteSprint(id)) {
+            Controller.render();
+            this.renderSprintList();
+            Controller.showToast('Sprint eliminado', 'info');
+          } else {
+            Controller.showToast('Debe haber al menos un sprint', 'error');
+          }
+        }
+      });
+    });
+
+    list.querySelectorAll('[data-move-from]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openMoveModal(btn.getAttribute('data-move-from'));
+      });
+    });
+  },
+
+  createSprint() {
+    const name = document.getElementById('newSprintName').value.trim();
+    if(!name) { Controller.showToast('El nombre es obligatorio', 'error'); return; }
+    const id = 's' + Date.now();
+    Model.addSprint({
+      id,
+      name,
+      startDate: document.getElementById('newSprintStart').value,
+      durationDays: parseInt(document.getElementById('newSprintDuration').value),
+      goal: document.getElementById('newSprintGoal').value.trim(),
+      status: 'planned'
+    });
+    document.getElementById('newSprintName').value = `Sprint ${Model.sprints.length + 1}`;
+    document.getElementById('newSprintGoal').value = '';
+    Controller.showToast(`Sprint "${name}" creado`, 'success');
+    this.renderSprintList();
+    Controller.render();
+  },
+
+  openMoveModal(fromSprintId) {
+    this.moveTargetId = null;
+    // Show sprint selector within move modal body
+    const otherSprints = Model.sprints.filter(s => s.id !== fromSprintId);
+    if(!otherSprints.length) { Controller.showToast('No hay otros sprints disponibles', 'error'); return; }
+
+    // Default target = first other sprint (prefer active or planned)
+    const target = otherSprints.find(s => s.status === 'active') || otherSprints.find(s => s.status === 'planned') || otherSprints[0];
+    this.moveTargetId = target.id;
+    this._moveFromSprintId = fromSprintId;
+
+    document.getElementById('moveTargetSprintName').innerHTML = `
+      <select id="moveTargetSelect" class="form-select" style="display:inline-block;width:auto;font-size:0.8rem;padding:3px 8px;margin-left:4px">
+        ${otherSprints.map(s => `<option value="${s.id}" ${s.id===target.id?'selected':''}>${s.name} (${s.status})</option>`).join('')}
+      </select>`;
+
+    document.getElementById('moveTargetSelect').addEventListener('change', e => {
+      this.moveTargetId = e.target.value;
+    });
+
+    this.moveFilterState = 'all';
+    document.querySelectorAll('#moveTasksModal .filter-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('moveFilterAll').classList.add('active');
+    this.renderMoveTasksList(fromSprintId);
+    document.getElementById('moveTasksModal').classList.add('open');
+  },
+
+  renderMoveTasksList(fromSprintId) {
+    const srcId = fromSprintId || this._moveFromSprintId;
+    let tasks = Model.tasks.filter(t => t.sprintId === srcId);
+    if(this.moveFilterState === 'backlog') tasks = tasks.filter(t => t.status === 'backlog');
+    if(this.moveFilterState === 'done') tasks = tasks.filter(t => t.status === 'done');
+
+    const list = document.getElementById('moveTasksList');
+    if(!tasks.length) { list.innerHTML = '<div class="empty-state"><i class="fa fa-inbox"></i><p>No hay tareas con este filtro</p></div>'; this.updateMoveCount(); return; }
+
+    list.innerHTML = tasks.map(t => `
+      <div class="move-task-item">
+        <input type="checkbox" id="mt_${t.id}" value="${t.id}" class="move-task-check" onchange="SprintManager.updateMoveCount()">
+        <label for="mt_${t.id}">
+          <span class="task-priority priority-${t.priority}" style="font-size:0.6rem">${t.priority}</span>
+          ${t.title}
+        </label>
+        <span class="move-task-sp">${t.points} SP</span>
+      </div>`).join('');
+    this.updateMoveCount();
+  },
+
+  selectAll(val) {
+    document.querySelectorAll('.move-task-check').forEach(c => c.checked = val);
+    this.updateMoveCount();
+  },
+
+  updateMoveCount() {
+    const n = document.querySelectorAll('.move-task-check:checked').length;
+    document.getElementById('moveSelectedCount').textContent = `${n} seleccionadas`;
+  },
+
+  confirmMove() {
+    const ids = [...document.querySelectorAll('.move-task-check:checked')].map(c => c.value);
+    if(!ids.length) { Controller.showToast('Selecciona al menos una tarea', 'error'); return; }
+    if(!this.moveTargetId) { Controller.showToast('Selecciona un sprint destino', 'error'); return; }
+    Model.moveTasksToSprint(ids, this.moveTargetId);
+    const targetName = Model.sprints.find(s => s.id === this.moveTargetId)?.name || '';
+    Controller.showToast(`${ids.length} tarea(s) movida(s) a ${targetName}`, 'success');
+    this.closeMoveModal();
+    this.renderSprintList();
+    Controller.render();
+  }
+};
+
+// ============================================================
+// BOARD MANAGER (rename + create from scratch)
+// ============================================================
+const BoardManager = {
+  selectedTemplate: 'scrum',
+  customCols: [],
+
+  TEMPLATES: {
+    scrum: [
+      { id:'backlog', name:'Backlog' }, { id:'todo', name:'To Do' },
+      { id:'code', name:'In Progress (Code)' }, { id:'design', name:'In Progress (Design)' },
+      { id:'review', name:'Review' }, { id:'testing', name:'Testing' }, { id:'done', name:'Done' }
+    ],
+    kanban: [
+      { id:'todo', name:'Por Hacer' }, { id:'code', name:'En Progreso' },
+      { id:'design', name:'Bloqueado' }, { id:'done', name:'Hecho' }
+    ],
+  },
+
+  init() {
+    // Load saved board name
+    const savedName = localStorage.getItem('sf_boardName') || 'Tablero Kanban';
+    document.getElementById('boardNameInput').value = savedName;
+
+    // Rename button
+    document.getElementById('renameBoardBtn').addEventListener('click', () => {
+      const input = document.getElementById('boardNameInput');
+      const val = input.value.trim();
+      if(!val) { Controller.showToast('El nombre no puede estar vacío', 'error'); return; }
+      localStorage.setItem('sf_boardName', val);
+      Controller.showToast(`Tablero renombrado a "${val}"`, 'success');
+      input.blur();
+    });
+    document.getElementById('boardNameInput').addEventListener('keydown', e => {
+      if(e.key === 'Enter') document.getElementById('renameBoardBtn').click();
+    });
+
+    // New board button
+    document.getElementById('newBoardBtn').addEventListener('click', () => this.openModal());
+    document.getElementById('closeScratchModal').addEventListener('click', () => this.closeModal());
+    document.getElementById('closeScratchModal2').addEventListener('click', () => this.closeModal());
+    document.getElementById('confirmScratchBtn').addEventListener('click', () => this.createFromScratch());
+
+    // Template selection
+    document.querySelectorAll('.scratch-template').forEach(el => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.scratch-template').forEach(t => t.classList.remove('selected'));
+        el.classList.add('selected');
+        this.selectedTemplate = el.dataset.tpl;
+        document.getElementById('customColsSection').style.display = this.selectedTemplate === 'custom' ? 'block' : 'none';
+        if(this.selectedTemplate === 'custom' && !this.customCols.length) this.addCustomCol();
+      });
+    });
+
+    document.getElementById('addCustomCol').addEventListener('click', () => this.addCustomCol());
+  },
+
+  openModal() {
+    document.getElementById('scratchBoardName').value = '';
+    document.getElementById('scratchSprintName').value = 'Sprint 1';
+    document.getElementById('customColsSection').style.display = 'none';
+    document.querySelectorAll('.scratch-template').forEach(t => t.classList.remove('selected'));
+    document.querySelector('[data-tpl="scrum"]').classList.add('selected');
+    this.selectedTemplate = 'scrum';
+    this.customCols = [];
+    document.getElementById('customColsList').innerHTML = '';
+    document.getElementById('scratchModal').classList.add('open');
+  },
+
+  closeModal() { document.getElementById('scratchModal').classList.remove('open'); },
+
+  addCustomCol() {
+    const colId = 'col_' + Date.now();
+    this.customCols.push(colId);
+    const colors = ['#b44fff','#ff4fa3','#ffd166','#00d4aa','#7eb8ff','#ff6b35'];
+    const color = colors[this.customCols.length % colors.length];
+    const div = document.createElement('div');
+    div.className = 'col-editor-item';
+    div.dataset.colId = colId;
+    div.innerHTML = `
+      <div class="col-color-dot" style="background:${color}"></div>
+      <input type="text" placeholder="Nombre de la columna" value="">
+      <button onclick="this.closest('.col-editor-item').remove()" style="background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8rem">✕</button>`;
+    document.getElementById('customColsList').appendChild(div);
+  },
+
+  createFromScratch() {
+    const boardName = document.getElementById('scratchBoardName').value.trim();
+    if(!boardName) { Controller.showToast('El nombre del tablero es obligatorio', 'error'); return; }
+    const sprintName = document.getElementById('scratchSprintName').value.trim() || 'Sprint 1';
+    const dur = parseInt(document.getElementById('scratchSprintDur').value);
+
+    // Build columns
+    let cols;
+    if(this.selectedTemplate === 'custom') {
+      const inputs = document.querySelectorAll('#customColsList input');
+      cols = [...inputs].map((inp, i) => ({ id: 'c' + i, name: inp.value.trim() || `Columna ${i+1}` }));
+      if(!cols.length) { Controller.showToast('Agrega al menos una columna', 'error'); return; }
+    } else {
+      cols = this.TEMPLATES[this.selectedTemplate] || this.TEMPLATES.scrum;
+    }
+
+    // Reset everything
+    const sprintId = 's' + Date.now();
+    const today = new Date().toISOString().split('T')[0];
+    Model.sprints = [{ id: sprintId, name: sprintName, startDate: today, durationDays: dur, goal: '', status: 'active' }];
+    Model.activeSprint = sprintId;
+    Model.tasks = [];
+    Model.ceremonies = [];
+
+    // Update columns in View
+    View.COLUMNS = cols.map(c => ({
+      id: c.id,
+      name: c.name,
+      cls: 'col-' + c.id,
+      icon: c.id.includes('done') || c.name.toLowerCase().includes('done') || c.name.toLowerCase().includes('hecho') ? 'fa-check-circle' :
+            c.id.includes('test') ? 'fa-flask' :
+            c.id.includes('review') ? 'fa-eye' :
+            c.id.includes('design') ? 'fa-pen-ruler' :
+            c.id.includes('code') || c.name.toLowerCase().includes('progreso') || c.name.toLowerCase().includes('progress') ? 'fa-code' :
+            c.id.includes('todo') || c.name.toLowerCase().includes('hacer') ? 'fa-list-check' : 'fa-inbox'
+    }));
+
+    // Save column config
+    localStorage.setItem('sf_columns', JSON.stringify(View.COLUMNS));
+    localStorage.setItem('sf_boardName', boardName);
+    Model.save();
+
+    document.getElementById('boardNameInput').value = boardName;
+    this.closeModal();
+    Controller.render();
+    SprintManager.renderSprintList && SprintManager.renderSprintList();
+    Controller.showToast(`¡Tablero "${boardName}" creado desde cero! 🚀`, 'success');
+  },
+
+  loadColumns() {
+    const saved = localStorage.getItem('sf_columns');
+    if(saved) {
+      try { View.COLUMNS = JSON.parse(saved); } catch(e) {}
+    }
+  }
+};
+
+// ============================================================
+// NOTIFICATION SYSTEM
+// ============================================================
+const Notifications = {
+  items: [],
+
+  load() {
+    try { this.items = JSON.parse(localStorage.getItem('sf_notifs') || '[]'); } catch(e) { this.items = []; }
+  },
+
+  save() {
+    try { localStorage.setItem('sf_notifs', JSON.stringify(this.items.slice(0, 50))); } catch(e) {}
+  },
+
+  add(type, title, body, icon = '🔔') {
+    const n = { id: 'n' + Date.now() + Math.random(), type, title, body, icon, time: new Date().toLocaleTimeString('es-MX', {hour:'2-digit',minute:'2-digit'}), date: new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short'}), unread: true };
+    this.items.unshift(n);
+    this.save();
+    this.render();
+    this.showDot();
+    // Flash toast as well
+    Controller.showToast(title, type === 'overdue' ? 'error' : type === 'new-task' ? 'info' : 'success');
+  },
+
+  showDot() {
+    const dot = document.getElementById('notifDot');
+    if(dot) dot.classList.add('show');
+  },
+
+  hideDot() {
+    const dot = document.getElementById('notifDot');
+    if(dot) dot.classList.remove('show');
+    this.items.forEach(n => n.unread = false);
+    this.save();
+  },
+
+  render() {
+    const list = document.getElementById('notifList');
+    if(!list) return;
+    if(!this.items.length) { list.innerHTML = '<div class="notif-empty">🎉 Sin notificaciones</div>'; return; }
+    const iconMap = { 'new-task':'📋', 'overdue':'⚠️', 'sprint':'⚡', 'phase':'🔄' };
+    list.innerHTML = this.items.map(n => `
+      <div class="notif-item ${n.unread?'unread':''}" data-id="${n.id}">
+        <div class="notif-icon ${n.type}">${n.icon || iconMap[n.type] || '🔔'}</div>
+        <div class="notif-body">
+          <strong>${n.title}</strong>
+          <span>${n.body}</span>
+        </div>
+        <span class="notif-time">${n.date}<br>${n.time}</span>
+      </div>`).join('');
+    // dot visibility
+    const hasUnread = this.items.some(n => n.unread);
+    if(hasUnread) this.showDot(); else this.hideDot();
+  },
+
+  clear() { this.items = []; this.save(); this.render(); this.hideDot(); },
+
+  // Check for overdue tasks — called on render
+  checkOverdue() {
+    const today = new Date().toISOString().split('T')[0];
+    Model.currentTasks.forEach(task => {
+      if(task.deadline && task.deadline < today && task.status !== 'done') {
+        const key = 'overdue_' + task.id;
+        if(!this.items.find(n => n.id === key)) {
+          const member = Model.team.find(m => m.id === task.assignee);
+          const who = member ? member.name : 'Sin asignar';
+          this.items.unshift({ id: key, type:'overdue', title:`⚠️ Tarea vencida`, body:`"${task.title}" — asignada a ${who}`, icon:'⚠️', time: new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}), date: new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'short'}), unread:true });
+        }
+      }
+    });
+    this.save();
+    this.render();
+  },
+
+  // Notify a new task was created
+  notifyNewTask(task) {
+    const member = Model.team.find(m => m.id === task.assignee);
+    const who = member ? `Asignada a ${member.avatar || ''} ${member.name}` : 'Sin asignar';
+    this.add('new-task', `📋 Nueva tarea creada`, `"${task.title}" — ${who}. ${task.points} SP · Prioridad ${task.priority}`, '📋');
+  },
+
+  notifyPhase(phase) {
+    const labels = { code:'💻 Fase: Desarrollo (Code)', review:'🔍 Fase: Revisión (Review)', testing:'🧪 Fase: Pruebas (Testing)', done:'✅ Sprint completado' };
+    const bodies = { code:'Las tareas deben avanzar a Code. Equipo de desarrollo en acción.', review:'Las tareas avanzan a Review. Product Owner debe validar.', testing:'Las tareas avanzan a Testing. QA debe verificar la calidad.', done:'¡Todas las tareas completadas! Sprint listo para cerrar.' };
+    this.add('phase', labels[phase] || 'Cambio de fase', bodies[phase] || '', '🔄');
+  },
+
+  init() {
+    this.load();
+    this.render();
+    const btn = document.getElementById('notifBtn');
+    const panel = document.getElementById('notifPanel');
+    if(btn) btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      panel.classList.toggle('open');
+      if(panel.classList.contains('open')) { this.hideDot(); this.render(); }
+    });
+    document.addEventListener('click', (e) => {
+      if(!panel.contains(e.target) && e.target !== btn) panel.classList.remove('open');
+    });
+    document.getElementById('clearNotifs').addEventListener('click', () => this.clear());
+    // Check overdue on load
+    setTimeout(() => this.checkOverdue(), 1000);
+    // Check every 5 minutes
+    setInterval(() => this.checkOverdue(), 300000);
+  }
+};
+
+// ============================================================
+// SPRINT PHASE TRACKER
+// ============================================================
+const SprintPhase = {
+  // Calculates current sprint phase based on elapsed days and task distribution
+  compute() {
+    const sp = Model.sprint;
+    if(!sp || !sp.startDate) return null;
+    const start = new Date(sp.startDate);
+    const dur = sp.durationDays || 14;
+    const elapsed = Math.max(0, Math.round((Date.now() - start.getTime()) / 86400000));
+    const pct = Math.min(100, Math.round(elapsed / dur * 100));
+    const tasks = Model.currentTasks;
+    const total = tasks.length;
+    if(!total) return null;
+    const done = tasks.filter(t => t.status === 'done').length;
+    const inReview = tasks.filter(t => t.status === 'review').length;
+    const inTesting = tasks.filter(t => t.status === 'testing').length;
+    const inCode = tasks.filter(t => t.status === 'code' || t.status === 'design').length;
+
+    // Determine phase
+    if(pct >= 85 && done < total * 0.7) return { phase:'warning', label:'⚠️ Sprint en riesgo', desc:`Quedan ${total-done} tareas sin completar y el sprint termina pronto.`, cls:'phase-warning' };
+    if(done / total >= 0.8) return { phase:'done', label:'🏁 Sprint casi completo', desc:`${done}/${total} tareas completadas. ¡Buen trabajo equipo!`, cls:'phase-testing' };
+    if(inTesting > 0 || pct >= 65) return { phase:'testing', label:'🧪 Fase Testing', desc:`${inTesting} tarea(s) en QA Testing. Verificar calidad antes de cerrar.`, cls:'phase-testing' };
+    if(inReview > 0 || pct >= 45) return { phase:'review', label:'🔍 Fase Review', desc:`${inReview} tarea(s) en revisión. Product Owner debe aprobar.`, cls:'phase-review' };
+    return { phase:'code', label:'💻 Fase Desarrollo', desc:`${inCode} tarea(s) en progreso. Equipo de desarrollo activo.`, cls:'phase-code' };
+  },
+
+  render() {
+    const banner = document.getElementById('sprintPhaseBanner');
+    if(!banner) return;
+    const info = this.compute();
+    if(!info) { banner.innerHTML = ''; return; }
+    banner.innerHTML = `<div class="sprint-phase-banner ${info.cls}"><span>${info.label}</span><span style="font-weight:400;opacity:0.85">${info.desc}</span></div>`;
+  },
+
+  // Track phase changes and notify
+  lastPhase: null,
+  checkAndNotify() {
+    const info = this.compute();
+    if(!info) return;
+    if(info.phase !== this.lastPhase) {
+      if(this.lastPhase !== null) Notifications.notifyPhase(info.phase);
+      this.lastPhase = info.phase;
+    }
+  }
+};
+
+// BOOT
+Controller.init();
+SprintManager.init();
+BoardManager.loadColumns();
+BoardManager.init();
+Notifications.init();
+SprintPhase.lastPhase = null;
+SprintPhase.render();
+</script>
+</body>
+</html>
